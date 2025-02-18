@@ -40,5 +40,5 @@ resource "aws_launch_template" "lt" {
     create_before_destroy = true
   }
 
-  user_data = file(var.ec2_bootstrap_script_path)
+  user_data = base64encode(file(var.ec2_bootstrap_script_path))
 }

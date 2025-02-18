@@ -1,7 +1,9 @@
+TFVARS_FILE="../tfvars/terraform.${USER}.tfvars"
+
 cd ../../tf/aws && \
-terraform destroy --auto-approve && \
+terraform destroy -var-file="${TFVARS_FILE}" --auto-approve && \
 rm -r .terraform && \
 rm .terraform.lock.hcl && \
 rm terraform.tfstate && \
 rm terraform.tfstate.backup && \
-rm "${USER}-sales-eng.plan"
+rm "../plans/${USER}-sales-eng.plan"
