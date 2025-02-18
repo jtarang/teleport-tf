@@ -32,3 +32,13 @@ variable "ec2_asg_min_size" {
   description = "The minimum size of the Auto Scaling group"
   type        = number
 }
+
+variable "tags" {
+  description = "A map of tags to apply to the resource"
+  type        = map(string)
+}
+
+variable "user_prefix" {
+  description = "User Prefix is used to make the resource owner identifiable"
+  default     = "jasmit-se-demo"
+}

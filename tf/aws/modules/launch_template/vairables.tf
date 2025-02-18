@@ -27,3 +27,8 @@ variable "launch_template_prefix" {
   description = "Name prefix for the launch template"
   type        = string
 }
+
+variable "ec2_bootstrap_script_path" {
+  description = "EC2 bootstrap or cloud-init script path"
+  type = string
+}

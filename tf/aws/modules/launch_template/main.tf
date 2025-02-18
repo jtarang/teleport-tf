@@ -18,11 +18,27 @@ resource "aws_launch_template" "lt" {
   })
 
   # Specify the SSH key pair for the instances launched by ASG
-  key_name = var.ssh_key_name            # SSH Key Pair Name (ensure you have this in the variable)
+  key_name = var.ssh_key_name     
 
   vpc_security_group_ids = var.nsg_ids
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = merge(var.tags, {
+      "Name" = "${var.launch_template_prefix}-ec2"
+    })
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+    tags = merge(var.tags, {
+      "Name" = "${var.launch_template_prefix}-ebs"
+    })
+  }
 
   lifecycle {
     create_before_destroy = true
   }
+
+  user_data = file(var.ec2_bootstrap_script_path)
 }

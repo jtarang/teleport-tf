@@ -10,9 +10,18 @@ resource "aws_autoscaling_group" "asg" {
     version = "$Latest"
   }
 
+  dynamic "tag" {
+    for_each = var.tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
+
   tag {
-    key = "teleport.dev/creator"
-    value = "jasmit.tarang@goteleport.com"
+    key = "Name"
+    value = "${var.user_prefix}-asg"
     propagate_at_launch = true
   }
 

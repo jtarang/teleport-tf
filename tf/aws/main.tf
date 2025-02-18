@@ -34,29 +34,19 @@ module "launch_template" {
   instance_type = var.ec2_instance_type
   nsg_ids = [module.nsg.nsg_id]
   ssh_key_name = module.ssh_key_pair.aws_key_pair_name
+  ec2_bootstrap_script_path = var.ec2_bootstrap_script_path
   tags = var.tags
 }
 
-module "ec2" {
-  source = "./modules/ec2"
-  launch_template_id = module.launch_template.launch_template_id
-  image_id = var.ec2_image_id
-  tags = var.tags
-  ec2_bootstrap_script_path = var.ec2_bootstrap_script_path
-  ssh_key_name = module.ssh_key_pair.aws_key_pair_name
+module "asg" {
+  source             = "./modules/asg"
+  ec2_asg_desired_capacity =  var.ec2_asg_desired_capacity
+  ec2_asg_max_size =   var.ec2_asg_max_size
+  ec2_asg_min_size =   var.ec2_asg_min_size
+  nsg_id = module.nsg.nsg_id
+  vpc_id = module.vpc.vpc_id
   public_subnet_id = module.vpc.public_subnet_id
-  instance_type = var.ec2_instance_type
-  nsg_ids = [module.nsg.nsg_id]
+  launch_template_id = module.launch_template.launch_template_id
+  tags = var.tags
   user_prefix = var.user_prefix
 }
-
-# module "asg" {
-#   source             = "./modules/asg"
-#   ec2_asg_desired_capacity =  var.ec2_asg_desired_capacity
-#   ec2_asg_max_size =   var.ec2_asg_max_size
-#   ec2_asg_min_size =   var.ec2_asg_min_size
-#   nsg_id = module.nsg.nsg_id
-#   vpc_id = module.vpc.vpc_id
-#   public_subnet_id = module.vpc.public_subnet_id
-#   launch_template_id = module.launch_template.launch_template_id
-# }
