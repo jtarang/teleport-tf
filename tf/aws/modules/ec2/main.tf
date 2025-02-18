@@ -5,13 +5,13 @@ resource "aws_instance" "ec2_instance" {
 
   # Use the Launch Template
   launch_template {
-    id = var.launch_template_id
-    version              = "$Latest"
+    id      = var.launch_template_id
+    version = "$Latest"
   }
 
-  key_name              = var.ssh_key_name
-  security_groups       = var.nsg_ids
-  subnet_id             = var.public_subnet_id
+  key_name        = var.ssh_key_name
+  security_groups = var.nsg_ids
+  subnet_id       = var.public_subnet_id
 
   tags = merge(var.tags, {
     "Name" = "${var.user_prefix}-ec2"

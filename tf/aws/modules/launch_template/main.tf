@@ -18,7 +18,7 @@ resource "aws_launch_template" "lt" {
   })
 
   # Specify the SSH key pair for the instances launched by ASG
-  key_name = var.ssh_key_name     
+  key_name = var.ssh_key_name
 
   vpc_security_group_ids = var.nsg_ids
 

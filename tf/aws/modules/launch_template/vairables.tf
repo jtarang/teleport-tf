@@ -30,5 +30,5 @@ variable "launch_template_prefix" {
 
 variable "ec2_bootstrap_script_path" {
   description = "EC2 bootstrap or cloud-init script path"
-  type = string
+  type        = string
 }
