@@ -1,0 +1,30 @@
+# Ignore Terraform's default files
+*.tfstate
+*.tfstate.*
+*.terraform/
+
+# Ignore plan files
+*.tfplan
+*.tfplan.*
+
+# Ignore sensitive files like SSH keys
+.ssh/
+
+# Ignore override files that are used for local configurations
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore .terraform.lock.hcl (Terraform's lock file)
+.terraform.lock.hcl
+
+# Ignore Terraform variables files (optional for version control)
+terraform.tfvars
+*.tfvars
+
+# Ignore crash reports
+crash.log
+
+# Ignore local config files
+.terraform/
