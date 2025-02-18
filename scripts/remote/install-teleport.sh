@@ -1,0 +1,1 @@
+echo "hello from teleport" >> /tmp/bootstrap.log

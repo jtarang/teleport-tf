@@ -1,0 +1,1 @@
+cd ../../tf/aws && terraform init && terraform validate && terraform plan -out jt-sales-eng.plan && terraform apply jt-sales-eng.plan
