@@ -11,14 +11,6 @@ Before running the Terraform scripts, ensure that you have the following:
 - **AWS Account**: Ensure you have access to an AWS account.
 - **AWS Credentials**: Ensure your AWS credentials are properly configured.
 
-### Module Descriptions
-
-- **vpc**: Configures the Virtual Private Cloud (VPC) resources including the CIDR block, DNS support, and hostnames.
-- **subnet**: Creates public and private subnets within the VPC.
-- **security_group**: Defines security groups such as allowing SSH access from a specific IP address.
-- **launch_template**: Creates an EC2 launch template with specific configuration, including user-data to install and configure software on the EC2 instance.
-- **ec2_instance**: Defines the EC2 instances using the launch template to deploy the instances with the desired configurations.
-
 ## Steps to Deploy Infrastructure
 
 ### 1. Clone the Repository
