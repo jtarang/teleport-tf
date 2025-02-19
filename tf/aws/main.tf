@@ -6,10 +6,10 @@ module "vpc" {
   source                  = "./modules/vpc"
   tags                    = var.tags
   vpc_cidr_block          = var.vpc_cidr_block
-  public_subnet_cidr      = var.public_subnet_cidr
-  private_subnet_cidr     = var.private_subnet_cidr
+  public_subnet_cidrs     = var.public_subnet_cidrs
+  private_subnet_cidrs    = var.private_subnet_cidrs
   map_public_ip_on_launch = var.map_public_ip_on_launch
-  availability_zone       = var.availability_zone
+  availability_zones      = var.availability_zones
   user_prefix             = var.user_prefix
 }
 
@@ -48,8 +48,21 @@ module "asg" {
   ec2_asg_min_size         = var.ec2_asg_min_size
   nsg_id                   = module.nsg.nsg_id
   vpc_id                   = module.vpc.vpc_id
-  public_subnet_id         = module.vpc.public_subnet_id
+  public_subnet_ids        = module.vpc.public_subnet_ids
   launch_template_id       = module.launch_template.launch_template_id
   tags                     = var.tags
   user_prefix              = var.user_prefix
+}
+
+module "eks" {
+  source = "./modules/eks"
+
+  eks_cluster_name       = "${var.user_prefix}-eks"
+  eks_cluster_version    = var.eks_cluster_version
+  eks_subnet_ids         = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids]) # Flattening the list of subnet IDs
+  eks_node_instance_type = var.eks_node_instance_type
+  eks_node_count         = var.eks_node_desired_capacity
+  eks_node_min_size      = var.eks_node_min_capacity
+  eks_node_max_size      = var.eks_node_max_capacity
+  tags                   = var.tags
 }

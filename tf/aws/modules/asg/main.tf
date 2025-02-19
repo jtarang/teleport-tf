@@ -2,7 +2,7 @@ resource "aws_autoscaling_group" "asg" {
   desired_capacity    = var.ec2_asg_desired_capacity
   max_size            = var.ec2_asg_max_size
   min_size            = var.ec2_asg_min_size
-  vpc_zone_identifier = [var.public_subnet_id]
+  vpc_zone_identifier = var.public_subnet_ids
 
 
   launch_template {

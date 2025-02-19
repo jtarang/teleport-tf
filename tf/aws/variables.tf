@@ -1,17 +1,25 @@
 variable "aws_region" {
   description = "AWS region"
+  type        = string
 }
 
 variable "vpc_cidr_block" {
   description = "CIDR block for the VPC"
+  type        = string
+}
+variable "public_subnet_cidrs" {
+  description = "The CIDR blocks for the public subnets"
+  type        = list(string)
 }
 
-variable "public_subnet_cidr" {
-  description = "CIDR block for the public subnet"
+variable "private_subnet_cidrs" {
+  description = "The CIDR blocks for the private subnets"
+  type        = list(string)
 }
 
-variable "private_subnet_cidr" {
-  description = "CIDR block for the private subnet"
+variable "availability_zones" {
+  description = "A list of availability zones to create subnets in"
+  type        = list(string)
 }
 
 variable "ssh_key_name" {
@@ -21,11 +29,6 @@ variable "ssh_key_name" {
 variable "map_public_ip_on_launch" {
   description = "Whether instances in the subnet should automatically receive a public IP on launch"
   type        = bool
-}
-
-variable "availability_zone" {
-  description = "The Availability Zone in which to deploy resources."
-  type        = string
 }
 
 variable "ec2_instance_type" {
@@ -80,4 +83,29 @@ variable "teleport_edition" {
 variable "teleport_version" {
   description = "Teleport Version to install"
   type        = string
+}
+
+variable "eks_cluster_version" {
+  description = "EKS cluster version"
+  type        = string
+}
+
+variable "eks_node_instance_type" {
+  description = "The EC2 instance type for the EKS node group"
+  type        = string
+}
+
+variable "eks_node_desired_capacity" {
+  description = "The desired number of nodes in the EKS node group"
+  type        = number
+}
+
+variable "eks_node_min_capacity" {
+  description = "The minimum size of the EKS node group"
+  type        = number
+}
+
+variable "eks_node_max_capacity" {
+  description = "The maximum size of the EKS node group"
+  type        = number
 }

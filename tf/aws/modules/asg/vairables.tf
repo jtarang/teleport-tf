@@ -13,9 +13,9 @@ variable "launch_template_id" {
   type        = string
 }
 
-variable "public_subnet_id" {
-  description = "The ID of the public subnet where EC2 instances will be launched"
-  type        = string
+variable "public_subnet_ids" {
+  description = "List of IDs of the public subnets where EC2 instances will be launched"
+  type        = list(string)
 }
 
 variable "ec2_asg_desired_capacity" {
