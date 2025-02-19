@@ -36,6 +36,8 @@ module "launch_template" {
   ssh_key_name              = module.ssh_key_pair.aws_key_pair_name
   ec2_bootstrap_script_path = var.ec2_bootstrap_script_path
   tags                      = var.tags
+  teleport_edition          = var.teleport_edition
+  teleport_version          = var.teleport_version
 }
 
 module "asg" {

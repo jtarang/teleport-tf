@@ -66,3 +66,13 @@ variable "ec2_bootstrap_script_path" {
   description = "EC2 bootstrap or cloud-init script path"
   type        = string
 }
+
+variable "teleport_edition" {
+  description = "Teleport Edition to install i.e(cloud, enterprise, oss)"
+  type        = string
+}
+
+variable "teleport_version" {
+  description = "Teleport Version to install"
+  type        = string
+}

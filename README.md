@@ -19,7 +19,7 @@ Clone the repository to your local machine:
 
 ### 2. Create a tfvars file
 ```
-cp -rv tf/tfvars/terraform.tfvars.template tf/tfvars/terraform.${USER}.tfvars
+cp -rv tf/tfvars/terraform.tfvars.tpl tf/tfvars/terraform.${USER}.tfvars
 ```
 
 ### 3. Terraform Apply

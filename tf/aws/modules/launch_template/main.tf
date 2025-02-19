@@ -40,5 +40,8 @@ resource "aws_launch_template" "lt" {
     create_before_destroy = true
   }
 
-  user_data = base64encode(file(var.ec2_bootstrap_script_path))
+  user_data = base64encode(templatefile(var.ec2_bootstrap_script_path, {
+    TELEPORT_VERSION = var.teleport_version,
+    TELEPORT_EDITION = var.teleport_edition
+  }))
 }
