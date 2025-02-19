@@ -31,7 +31,7 @@ variable "public_subnet_id" {
 
 variable "ec2_bootstrap_script_path" {
   description = "EC2 bootstrap or cloud-init script path"
-  type = string
+  type        = string
 }
 
 variable "nsg_ids" {

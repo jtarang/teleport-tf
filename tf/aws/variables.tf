@@ -67,6 +67,11 @@ variable "ec2_bootstrap_script_path" {
   type        = string
 }
 
+variable "ec2_ami_ssm_parameter" {
+  description = "Path to latest ami SSM parameter"
+  type        = string
+}
+
 variable "teleport_edition" {
   description = "Teleport Edition to install i.e(cloud, enterprise, oss)"
   type        = string

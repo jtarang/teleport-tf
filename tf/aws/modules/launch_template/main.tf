@@ -1,11 +1,11 @@
 # Fetch the latest Amazon Linux 2 AMI ID from SSM Parameter Store
-data "aws_ssm_parameter" "latest_amazon_linux_ami" {
-  name = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+data "aws_ssm_parameter" "selected_ami" {
+  name = var.ec2_ami_ssm_parameter
 }
 
 # Define a local value to conditionally select the image ID
 locals {
-  selected_image_id = length(var.image_id) > 0 ? var.image_id : data.aws_ssm_parameter.latest_amazon_linux_ami.value
+  selected_image_id = length(var.image_id) > 0 ? var.image_id : data.aws_ssm_parameter.selected_ami.value
 }
 
 resource "aws_launch_template" "lt" {

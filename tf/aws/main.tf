@@ -35,6 +35,7 @@ module "launch_template" {
   nsg_ids                   = [module.nsg.nsg_id]
   ssh_key_name              = module.ssh_key_pair.aws_key_pair_name
   ec2_bootstrap_script_path = var.ec2_bootstrap_script_path
+  ec2_ami_ssm_parameter     = var.ec2_ami_ssm_parameter
   tags                      = var.tags
   teleport_edition          = var.teleport_edition
   teleport_version          = var.teleport_version
