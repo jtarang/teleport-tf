@@ -47,6 +47,23 @@ resource "aws_subnet" "private" {
   })
 }
 
+resource "aws_eip" "nat_eip" {
+  domain = "vpc"
+  tags = var.tags
+}
+
+# Create NAT Gateway
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat_eip.id
+
+  # Reference the first public subnet dynamically
+  subnet_id = values(aws_subnet.public)[0].id 
+
+  tags = {
+    Name = "${var.user_prefix}-nat-gateway"
+  }
+}
+
 # Create an Internet Gateway
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
@@ -77,4 +94,28 @@ resource "aws_route_table_association" "public" {
 
   subnet_id      = each.value.id
   route_table_id = aws_route_table.public.id
+}
+
+# Create a Route Table for Private Subnets
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(var.tags, {
+    "Name" = "${var.user_prefix}-private-route-table"
+  })
+}
+
+# Create a route for private subnets to the NAT gateway
+resource "aws_route" "private_nat_gateway" {
+  route_table_id         = aws_route_table.private.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.nat.id
+}
+
+# Associate the route table with the private subnets
+resource "aws_route_table_association" "private" {
+  for_each = aws_subnet.private
+
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.private.id
 }

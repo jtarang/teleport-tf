@@ -13,6 +13,11 @@ variable "eks_subnet_ids" {
   type        = list(string)
 }
 
+variable "eks_security_group_ids" {
+  description = "The list of security group IDs to associate with the EKS cluster"
+  type        = list(string)
+}
+
 variable "eks_node_instance_type" {
   description = "The EC2 instance type for the EKS node group"
   type        = string

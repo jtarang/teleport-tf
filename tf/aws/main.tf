@@ -21,19 +21,13 @@ module "nsg" {
   tags           = var.tags
 }
 
-module "ssh_key_pair" {
-  source      = "./modules/ssh_key_pairs"
-  key_name    = var.ssh_key_name
-  tags        = var.tags
-  user_prefix = var.user_prefix
-}
 module "launch_template" {
   source                    = "./modules/launch_template"
   launch_template_prefix    = var.user_prefix
   image_id                  = var.ec2_image_id
   instance_type             = var.ec2_instance_type
   nsg_ids                   = [module.nsg.nsg_id]
-  ssh_key_name              = module.ssh_key_pair.aws_key_pair_name
+  ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
   ec2_bootstrap_script_path = var.ec2_bootstrap_script_path
   ec2_ami_ssm_parameter     = var.ec2_ami_ssm_parameter
   tags                      = var.tags
@@ -57,9 +51,11 @@ module "asg" {
 module "eks" {
   source = "./modules/eks"
 
+
   eks_cluster_name       = "${var.user_prefix}-eks"
   eks_cluster_version    = var.eks_cluster_version
   eks_subnet_ids         = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids]) # Flattening the list of subnet IDs
+  eks_security_group_ids = [module.nsg.nsg_id]
   eks_node_instance_type = var.eks_node_instance_type
   eks_node_count         = var.eks_node_desired_capacity
   eks_node_min_size      = var.eks_node_min_capacity
