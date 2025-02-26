@@ -15,7 +15,7 @@ ec2_bootstrap_script_path = "../../scripts/remote/install-teleport.sh"
 teleport_version          = "<TELEPORT_VERSION_TO_INSTALL>"
 teleport_edition          = "<TELEPORT_EDITION_TO_INSTALL>"
 
-eks_cluster_version       = "1.29"
+eks_cluster_version       = "1.32"
 eks_node_instance_type    = "t2.micro"
 eks_node_desired_capacity = 1
 eks_node_min_capacity     = 1

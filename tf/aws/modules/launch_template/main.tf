@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 # Fetch the latest Amazon Linux 2 AMI ID from SSM Parameter Store
 data "aws_ssm_parameter" "selected_ami" {
   name = var.ec2_ami_ssm_parameter
@@ -42,6 +44,8 @@ resource "aws_launch_template" "lt" {
 
   user_data = base64encode(templatefile(var.ec2_bootstrap_script_path, {
     TELEPORT_VERSION = var.teleport_version,
-    TELEPORT_EDITION = var.teleport_edition
+    TELEPORT_EDITION = var.teleport_edition,
+    REGION = data.aws_region.current.name,
+    EC2_INSTANCE_NAME = "${var.launch_template_prefix}-ec2"
   }))
 }

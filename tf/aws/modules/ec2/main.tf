@@ -17,7 +17,7 @@ resource "aws_instance" "ec2_instance" {
     "Name" = "${var.user_prefix}-ec2"
   })
 
-  user_data = file(var.ec2_bootstrap_script_path)
+  user_data = base64encode(file(var.ec2_bootstrap_script_path))
 }
 
 # Usage example
