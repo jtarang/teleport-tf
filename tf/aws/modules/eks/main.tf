@@ -34,6 +34,8 @@ resource "aws_eks_cluster" "eks_cluster" {
   vpc_config {
     subnet_ids         = var.eks_subnet_ids
     security_group_ids = var.eks_security_group_ids
+    subnet_ids         = var.eks_subnet_ids
+    security_group_ids = var.eks_security_group_ids
   }
 
   tags = var.tags
@@ -69,10 +71,18 @@ resource "aws_iam_role_policy_attachment" "eks_node_group_autoscaler_policy_atta
 }
 
 resource "aws_iam_role_policy_attachment" "eks_node_group_ec2_registry_attachment" {
+resource "aws_iam_role_policy_attachment" "eks_node_group_autoscaler_policy_attachment" {
   role       = aws_iam_role.eks_node_group_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_group_ec2_registry_attachment" {
+  role       = aws_iam_role.eks_node_group_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
+resource "aws_iam_role_policy_attachment" "eks_node_group_cni_attachment" {
 resource "aws_iam_role_policy_attachment" "eks_node_group_cni_attachment" {
   role       = aws_iam_role.eks_node_group_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
@@ -85,6 +95,7 @@ resource "aws_eks_node_group" "eks_node_group" {
   subnet_ids      = var.eks_subnet_ids
   instance_types  = [var.eks_node_instance_type]
   
+  
   scaling_config {
     min_size     = var.eks_node_min_size
     max_size     = var.eks_node_max_size
@@ -92,6 +103,8 @@ resource "aws_eks_node_group" "eks_node_group" {
   }
 
   tags = var.tags
+
+  depends_on = [aws_eks_cluster.eks_cluster]
 
   depends_on = [aws_eks_cluster.eks_cluster]
 }
