@@ -69,3 +69,14 @@ db_skip_final_snapshot     = true  # Skip final snapshot when deleting RDS insta
 db_storage_encrypted       = false  # Whether storage should be encrypted
 db_parameter_group_name    = "default.postgres17"  # Parameter group for PostgreSQL
 db_enable_iam_authentication = true  # Enable IAM authentication for database access
+
+# ==============================
+# Aurora Cluster Instance Configuration
+# ==============================
+aurora_cluster_identifier        = "jasmit-aurora-cluster"
+aurora_db_username               = "jasmit"
+aurora_db_name                   = "jasmitAuroraDb"
+aurora_db_instance_class         = "db.t4g.medium"   # Smallest compute for Aurora
+aurora_db_publicly_accessible   = true            
+aurora_engine_version            = "16.6"           # Set a valid version for PostgreSQL (adjust if MySQL)
+aurora_engine_type               = "aurora-postgresql"  # or "aurora-mysql" depending on the engine you choose

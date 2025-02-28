@@ -49,35 +49,33 @@ module "asg" {
 }
 
 module "rds_instance" {
-  source                     = "./modules/rds"
-  db_instance_identifier     = var.db_instance_identifier
-  db_username                = var.db_username
+  source                 = "./modules/rds"
+  db_instance_identifier = var.db_instance_identifier
+  db_username            = var.db_username
   # DB Password is now managed in secrets manager
-  db_name                    = var.db_name
-  db_port                    = var.db_port
-  db_instance_class          = var.db_instance_class
-  db_allocated_storage       = var.db_allocated_storage
-  db_storage_type            = var.db_storage_type
-  db_engine                  = var.db_engine
-  db_engine_version          = var.db_engine_version
-  db_publicly_accessible     = var.db_publicly_accessible
+  db_name                      = var.db_name
+  db_port                      = var.db_port
+  db_instance_class            = var.db_instance_class
+  db_allocated_storage         = var.db_allocated_storage
+  db_storage_type              = var.db_storage_type
+  db_engine                    = var.db_engine
+  db_engine_version            = var.db_engine_version
+  db_publicly_accessible       = var.db_publicly_accessible
   db_enable_iam_authentication = var.db_enable_iam_authentication
-  db_multi_az                = var.db_multi_az
-  db_backup_retention_period = var.db_backup_retention_period
-  db_skip_final_snapshot     = var.db_skip_final_snapshot
-  db_storage_encrypted       = var.db_storage_encrypted
-  db_parameter_group_name    = var.db_parameter_group_name
-  db_security_group_ids      = [module.nsg.nsg_id]
-  db_tags                    = var.tags
-  db_subnet_group_name       = "${var.user_prefix}-db-group"
-  db_subnet_ids              = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids])
+  db_multi_az                  = var.db_multi_az
+  db_backup_retention_period   = var.db_backup_retention_period
+  db_skip_final_snapshot       = var.db_skip_final_snapshot
+  db_storage_encrypted         = var.db_storage_encrypted
+  db_parameter_group_name      = var.db_parameter_group_name
+  db_security_group_ids        = [module.nsg.nsg_id]
+  db_tags                      = var.tags
+  db_subnet_group_name         = "${var.user_prefix}-db-group"
+  db_subnet_ids                = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids])
 }
 
 
 module "eks" {
-  source = "./modules/eks"
-
-
+  source                 = "./modules/eks"
   eks_cluster_name       = "${var.user_prefix}-eks"
   eks_cluster_version    = var.eks_cluster_version
   eks_subnet_ids         = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids]) # Flattening the list of subnet IDs
@@ -87,4 +85,20 @@ module "eks" {
   eks_node_min_size      = var.eks_node_min_capacity
   eks_node_max_size      = var.eks_node_max_capacity
   tags                   = var.tags
+}
+
+module "aurora" {
+  source                        = "./modules/aurora"
+  aurora_cluster_identifier     = var.aurora_cluster_identifier
+  aurora_db_username            = var.aurora_db_username
+  aurora_db_name                = var.aurora_db_name
+  aurora_db_subnet_group_name   = "${var.user_prefix}-db-group"
+  aurora_db_instance_class      = var.aurora_db_instance_class
+  aurora_db_publicly_accessible = var.aurora_db_publicly_accessible
+  aurora_engine_version         = var.aurora_engine_version
+  aurora_engine_type            = var.aurora_engine_type
+  aurora_db_security_group_ids  = [module.nsg.nsg_id]
+  aurora_db_subnet_ids          = flatten([module.vpc.public_subnet_ids])
+  user_prefix                   = var.user_prefix
+  aurora_db_tags                = var.tags
 }

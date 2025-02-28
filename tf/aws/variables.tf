@@ -189,4 +189,35 @@ variable "db_parameter_group_name" {
 variable "db_enable_iam_authentication" {
   description = "Enables IAM Authentication for RDS"
   type        = bool
-} 
+}
+
+variable "aurora_cluster_identifier" {
+  description = "The identifier for the Aurora DB cluster"
+}
+
+variable "aurora_db_username" {
+  description = "Database master username"
+}
+
+variable "aurora_db_name" {
+  description = "The name of the database"
+}
+
+variable "aurora_db_instance_class" {
+  description = "The instance class of the DB instance."
+  type        = string
+}
+
+variable "aurora_db_publicly_accessible" {
+  description = "Indicates whether the DB instance is publicly accessible."
+  type        = bool
+}
+
+variable "aurora_engine_version" {
+  description = "The engine version for Aurora"
+}
+
+variable "aurora_engine_type" {
+  description = "Aurora Cluster Engine type"
+  type        = string
+}
