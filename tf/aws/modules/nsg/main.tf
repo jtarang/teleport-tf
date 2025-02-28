@@ -46,15 +46,6 @@ resource "aws_security_group" "nsg" {
     cidr_blocks = ["${var.my_external_ip}/32"] # Restrict access to the specified IP only
   }
 
-  # Postgres Test
-  # ingress {
-  #   from_port   = 5432
-  #   to_port     = 5432
-  #   protocol    = "tcp"
-  #   cidr_blocks = ["0.0.0.0/0"]
-  # }
-
-
   #  Allow CoreDNS communication
   ingress {
     from_port   = 53
