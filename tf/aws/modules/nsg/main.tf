@@ -1,9 +1,6 @@
 resource "aws_security_group" "nsg" {
   name        = "${var.user_prefix}-sg"
   description = "${var.user_prefix}: Network Security Group"
-resource "aws_security_group" "nsg" {
-  name        = "${var.user_prefix}-sg"
-  description = "${var.user_prefix}: Network Security Group"
   vpc_id      = var.vpc_id
   
   

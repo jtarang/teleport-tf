@@ -29,7 +29,7 @@ ec2_bootstrap_script_path = "../../scripts/remote/install-teleport.sh"  # Path t
 ec2_ami_ssm_parameter     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"  # SSM parameter for AMI ID
 ec2_instance_type         = "t2.micro"  # EC2 instance type
 ec2_image_id              = ""  # Leave empty for dynamic selection via AWS API
-ssh_key_name              = "jasmit-us-west-1"  # SSH key name for EC2 access
+ssh_key_name              = "jasmit" # ${first_name} only, it gets appened with the region in the template # SSH key name for EC2 access
 map_public_ip_on_launch   = true  # Enable public IP mapping on EC2 launch
 
 
