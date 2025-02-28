@@ -3,6 +3,7 @@ resource "aws_security_group" "nsg" {
   description = "${var.user_prefix}: Network Security Group"
   vpc_id      = var.vpc_id
   
+  
   tags = merge(var.tags, {
     "Name" = "${var.user_prefix}-nsg"
   })
@@ -38,6 +39,13 @@ resource "aws_security_group" "nsg" {
     self        = true
   }
 
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["${var.my_external_ip}/32"] # Restrict access to the specified IP only
+  }
+
   #  Allow CoreDNS communication
   ingress {
     from_port   = 53
@@ -52,5 +60,19 @@ resource "aws_security_group" "nsg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "icmp"
+  }
+
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "tcp"
   }
 }

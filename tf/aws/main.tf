@@ -48,6 +48,32 @@ module "asg" {
   user_prefix              = var.user_prefix
 }
 
+module "rds_instance" {
+  source                     = "./modules/rds"
+  db_instance_identifier     = var.db_instance_identifier
+  db_username                = var.db_username
+  # DB Password is now managed in secrets manager
+  db_name                    = var.db_name
+  db_port                    = var.db_port
+  db_instance_class          = var.db_instance_class
+  db_allocated_storage       = var.db_allocated_storage
+  db_storage_type            = var.db_storage_type
+  db_engine                  = var.db_engine
+  db_engine_version          = var.db_engine_version
+  db_publicly_accessible     = var.db_publicly_accessible
+  db_enable_iam_authentication = var.db_enable_iam_authentication
+  db_multi_az                = var.db_multi_az
+  db_backup_retention_period = var.db_backup_retention_period
+  db_skip_final_snapshot     = var.db_skip_final_snapshot
+  db_storage_encrypted       = var.db_storage_encrypted
+  db_parameter_group_name    = var.db_parameter_group_name
+  db_security_group_ids      = [module.nsg.nsg_id]
+  db_tags                    = var.tags
+  db_subnet_group_name       = "${var.user_prefix}-db-group"
+  db_subnet_ids              = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids])
+}
+
+
 module "eks" {
   source = "./modules/eks"
 

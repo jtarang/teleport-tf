@@ -6,6 +6,8 @@
 # Ignore plan files
 *.tfplan
 *.tfplan.*
+tf/plans/*
+tf/plans/
 
 # Ignore sensitive files like SSH keys
 .ssh/

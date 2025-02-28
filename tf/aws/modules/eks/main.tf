@@ -26,6 +26,10 @@ resource "aws_eks_cluster" "eks_cluster" {
   name     = var.eks_cluster_name
   role_arn = aws_iam_role.eks_cluster_role.arn
   version  = var.eks_cluster_version
+  
+  access_config {
+    authentication_mode = "API_AND_CONFIG_MAP"
+  }
 
   vpc_config {
     subnet_ids         = var.eks_subnet_ids
@@ -81,6 +85,7 @@ resource "aws_eks_node_group" "eks_node_group" {
   subnet_ids      = var.eks_subnet_ids
   instance_types  = [var.eks_node_instance_type]
   
+  
   scaling_config {
     min_size     = var.eks_node_min_size
     max_size     = var.eks_node_max_size
@@ -90,4 +95,5 @@ resource "aws_eks_node_group" "eks_node_group" {
   tags = var.tags
 
   depends_on = [aws_eks_cluster.eks_cluster]
+
 }
