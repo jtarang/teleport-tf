@@ -80,3 +80,14 @@ aurora_db_instance_class         = "db.t4g.medium"   # Smallest compute for Auro
 aurora_db_publicly_accessible   = true            
 aurora_engine_version            = "16.6"           # Set a valid version for PostgreSQL (adjust if MySQL)
 aurora_engine_type               = "aurora-postgresql"  # or "aurora-mysql" depending on the engine you choose
+
+
+# ==============================
+# Lambda Configuration
+# ==============================
+lambda_name = "jasmit-se-demo-lambda-function"  # Set your desired Lambda name
+lambda_runtime = "python3.13"  # Set the Lambda runtime you wish to use, e.g., python3.13 etc.
+lambda_handler = "lambda_handler.lambda_handler"  # Update the handler if needed
+lambda_role_name = "jasmit-se-demo-lambda-execution-role"  # Set the desired role name
+lambda_policy_name = "jasmit-se-demo-lambda-execution-policy"  # Set the desired policy name
+lambda_environment_variables = {}

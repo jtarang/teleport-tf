@@ -66,3 +66,13 @@ db_skip_final_snapshot     = false  # Skip final snapshot when deleting RDS inst
 db_storage_encrypted       = true  # Whether to encrypt storage (true/false)
 db_parameter_group_name    = "default.postgres13"  # Parameter group for PostgreSQL (e.g., "default.postgres13")
 db_enable_iam_authentication = true  # Enable IAM authentication for DB access (true/false)
+
+# ==============================
+# Lambda Configuration
+# ==============================
+lambda_name = "<PREFIX>-lambda-function"  # Set your desired Lambda name
+lambda_runtime = "python3.13"  # Set the Lambda runtime you wish to use, e.g., python3.13 etc.
+lambda_handler = "lambda_handler.lambda_handler"  # Update the handler if needed
+lambda_role_name = "<PREFIX>-lambda-execution-role"  # Set the desired role name
+lambda_policy_name = "<PREFIX>-lambda-execution-policy"  # Set the desired policy name
+lambda_environment_variables = {}

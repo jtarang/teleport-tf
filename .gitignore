@@ -30,3 +30,8 @@ crash.log
 
 # Ignore local config files
 .terraform/
+
+# Ignore MacOS file 
+.DS_Store
+tf/.DS_Store
+tf/aws/.DS_Store
