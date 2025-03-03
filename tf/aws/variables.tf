@@ -221,3 +221,39 @@ variable "aurora_engine_type" {
   description = "Aurora Cluster Engine type"
   type        = string
 }
+
+variable "lambda_name" {
+  description = "The name of the Lambda function"
+  type        = string
+  default     = "my-lambda-function"  # You can change the default name
+}
+
+variable "lambda_runtime" {
+  description = "The runtime environment for the Lambda function"
+  type        = string
+  default     = "python3.8"  # Change to your desired Python version
+}
+
+variable "lambda_handler" {
+  description = "The function handler for the Lambda function"
+  type        = string
+  default     = "index.lambda_handler"  # Placeholder handler
+}
+
+variable "lambda_role_name" {
+  description = "The name of the IAM role for Lambda execution"
+  type        = string
+  default     = "lambda-execution-role"
+}
+
+variable "lambda_policy_name" {
+  description = "The name of the IAM policy for Lambda"
+  type        = string
+  default     = "lambda-execution-policy"
+}
+
+variable "lambda_environment_variables" {
+  description = "Environment variables to be passed to the Lambda function"
+  type        = map(string)
+  default     = {}
+}
