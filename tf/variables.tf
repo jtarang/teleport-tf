@@ -80,11 +80,6 @@ variable "teleport_edition" {
   type        = string
 }
 
-variable "teleport_version" {
-  description = "Teleport Version to install"
-  type        = string
-}
-
 variable "eks_cluster_version" {
   description = "EKS cluster version"
   type        = string
@@ -256,4 +251,14 @@ variable "lambda_environment_variables" {
   description = "Environment variables to be passed to the Lambda function"
   type        = map(string)
   default     = {}
+}
+
+variable "teleport_address" {
+  description = "Teleport Domain/Address; this is grabbed from the local env vars from tctl"
+  type = string
+}
+
+variable "teleport_identity_file_base64" {
+  description = "Teleport Identity File in base64"
+  type = string
 }
