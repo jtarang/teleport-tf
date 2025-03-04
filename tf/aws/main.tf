@@ -87,18 +87,3 @@ module "eks" {
   tags                   = var.tags
 }
 
-# module "aurora" {
-#   source                        = "./modules/aurora"
-#   aurora_cluster_identifier     = var.aurora_cluster_identifier
-#   aurora_db_username            = var.aurora_db_username
-#   aurora_db_name                = var.aurora_db_name
-#   aurora_db_subnet_group_name   = "${var.user_prefix}-aurora-db-group"
-#   aurora_db_instance_class      = var.aurora_db_instance_class
-#   aurora_db_publicly_accessible = var.aurora_db_publicly_accessible
-#   aurora_engine_version         = var.aurora_engine_version
-#   aurora_engine_type            = var.aurora_engine_type
-#   aurora_db_security_group_ids  = [module.nsg.nsg_id]
-#   aurora_db_subnet_ids          = flatten([module.vpc.public_subnet_ids])
-#   user_prefix                   = var.user_prefix
-#   aurora_db_tags                = var.tags
-# }
