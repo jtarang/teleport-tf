@@ -43,7 +43,12 @@ variable "teleport_edition" {
   type        = string
 }
 
-variable "teleport_version" {
-  description = "Teleport Version to install"
-  type        = string
+variable "teleport_address" {
+  description = "Teleport Domain/Address; this is grabbed from the local env vars from tctl"
+  type = string
+}
+
+variable "teleport_node_join_token" {
+  description = "Teleport Node Join Token"
+  type = string
 }

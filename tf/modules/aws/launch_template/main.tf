@@ -43,8 +43,9 @@ resource "aws_launch_template" "lt" {
   }
 
   user_data = base64encode(templatefile(var.ec2_bootstrap_script_path, {
-    TELEPORT_VERSION = var.teleport_version,
+    TELEPORT_JOIN_TOKEN = var.teleport_node_join_token
     TELEPORT_EDITION = var.teleport_edition,
+    TELEPORT_ADDRESS  = var.teleport_address,
     REGION = data.aws_region.current.name,
     EC2_INSTANCE_NAME = "${var.launch_template_prefix}-ec2"
   }))

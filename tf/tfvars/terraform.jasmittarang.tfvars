@@ -25,7 +25,7 @@ availability_zones        = ["us-west-1a", "us-west-1b"]  # Availability zones f
 ec2_asg_desired_capacity  = 1  # Desired capacity of EC2 Auto Scaling Group
 ec2_asg_min_size          = 1  # Minimum size of EC2 Auto Scaling Group
 ec2_asg_max_size          = 2  # Maximum size of EC2 Auto Scaling Group
-ec2_bootstrap_script_path = "../../scripts/remote/install-teleport.sh"  # Path to EC2 bootstrap script
+ec2_bootstrap_script_path = "../scripts/remote/install-teleport.sh"  # Path to EC2 bootstrap script
 ec2_ami_ssm_parameter     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"  # SSM parameter for AMI ID
 ec2_instance_type         = "t2.micro"  # EC2 instance type
 ec2_image_id              = ""  # Leave empty for dynamic selection via AWS API
@@ -37,8 +37,8 @@ map_public_ip_on_launch   = true  # Enable public IP mapping on EC2 launch
 # Teleport Configuration
 # ==============================
 # Teleport Configuration for EC2 Instances
-teleport_version          = "17.2.7"  # Teleport version to be installed on EC2
 teleport_edition          = "enterprise"  # Teleport edition to be used
+# teleport_address and teleport_identity is grabbed from tctl env
 
 # ==============================
 # EKS Cluster Configuration
