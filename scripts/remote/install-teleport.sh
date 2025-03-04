@@ -23,7 +23,7 @@ ssh_service:
   labels:
     env: dev
     os: amazon-linux
-  commands: #https://goteleport.com/docs/management/admin/labels/
+  commands: # https://goteleport.com/docs/admin-guides/management/diagnostics/
     - name: "load_average"
       command: ["/bin/sh", "-c", "cut -d' ' -f1 /proc/loadavg"]
       period: "30s"
@@ -39,3 +39,4 @@ EOF
 systemctl enable teleport
 systemctl start teleport
 systemctl status teleport
+
