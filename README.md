@@ -7,6 +7,7 @@ This repository contains Terraform configurations for setting up AWS resources a
 Before running the Terraform scripts, ensure that you have the following:
 
 - **Terraform**: Download Terraform and install it.
+- **Teleport**: Install Teleport which will also install tctl and tsh 
 - **AWS CLI**: Install AWS CLI to interact with AWS services from the command line.
 - **AWS Account**: Ensure you have access to an AWS account.
 - **AWS Credentials**: Ensure your AWS credentials are properly configured.
@@ -27,18 +28,19 @@ cp -rv tf/tfvars/terraform.tfvars.tpl tf/tfvars/terraform.${USER}.tfvars
 There are helper scripts in `scripts/local/tf-*.sh`
  
 Run the follow command to apply
-```
-cd tf/aws/ && ../../scripts/local/tf-apply.sh
-```
 
-This should create the ssh key in `REPO_ROOT/.ssh` and the plan in `REPO_ROOT/tf/plans/`. 
+```
+cd tf && ../scripts/local/tf-apply.sh
+```
+The script also uses tctl for Teleport credentials. 
+This should create the plan in `REPO_ROOT/tf/plans/`. 
 
 ### Clean Up Resources
 
 Run the following command to destroy 
 
 ```
-cd tf/aws/ && ../../scripts/local/tf-destroy.sh
+cd tf/ && ../scripts/local/tf-destroy.sh
 ```
 
 This will remove all resources in the cloud, ssh keys and plans locally. 
