@@ -45,10 +45,33 @@ variable "teleport_edition" {
 
 variable "teleport_address" {
   description = "Teleport Domain/Address; this is grabbed from the local env vars from tctl"
-  type = string
+  type        = string
 }
 
 variable "teleport_node_join_token" {
   description = "Teleport Node Join Token"
-  type = string
+  type        = string
+}
+
+variable "iam_instance_role_name" {
+  description = "The Name of the IAM role to be associated with EC2 instances profile."
+  type        = string
+}
+
+variable "database_name" {
+  description = "The name of the database"
+  type        = string
+  default     = ""
+}
+
+variable "database_uri" {
+  description = "The URI of the database"
+  type        = string
+  default     = ""
+}
+
+variable "database_protocol" {
+  description = "The protocol used to connect to the database"
+  type        = string
+  default     = ""
 }

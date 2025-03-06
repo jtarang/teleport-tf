@@ -1,12 +1,14 @@
 #!/bin/bash
+
 RANDOM_SUFFIX=$(openssl rand -base64 2 | tr -dc 'a-zA-Z0-9' | tr '[:upper:]' '[:lower:]')
 sudo hostnamectl set-hostname "${EC2_INSTANCE_NAME}-$RANDOM_SUFFIX"
 
 TELEPORT_VERSION="$(curl https://${TELEPORT_ADDRESS}/v1/webapi/automaticupgrades/channel/default/version | sed 's/v//')"
-curl https://goteleport.com/static/install.sh | bash -s $TELEPORT_VERSION ${TELEPORT_EDITION}
+curl https://cdn.teleport.dev/install.sh | bash -s $TELEPORT_VERSION ${TELEPORT_EDITION}
 
 echo ${TELEPORT_JOIN_TOKEN} > /tmp/token
 
+# Start of teleport.yaml configuration
 cat<<EOF >/etc/teleport.yaml
 version: v3
 teleport:
@@ -36,7 +38,20 @@ auth_service:
   enabled: false
 EOF
 
+# Check for the existence of DATABASE_NAME, DATABASE_PROTOCOL, DATABASE_URI and append the db_service block if they exist
+if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}" ]]; then
+  cat<<EOF >>/etc/teleport.yaml
+db_service:
+  enabled: true
+  databases:
+  - name: "${DATABASE_NAME}"
+    protocol: "${DATABASE_PROTOCOL}"
+    uri: "${DATABASE_URI}"
+    static_labels:
+      "env": "dev"
+EOF
+fi
+
 systemctl enable teleport
 systemctl start teleport
 systemctl status teleport
-

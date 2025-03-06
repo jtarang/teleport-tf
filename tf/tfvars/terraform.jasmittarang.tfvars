@@ -64,11 +64,10 @@ rds_db_engine                  = "postgres"  # Database engine (PostgreSQL)
 rds_db_engine_version          = "17.4"  # Version of PostgreSQL
 rds_db_publicly_accessible     = true  # Make the database publicly accessible
 rds_db_multi_az                = false  # Multi-AZ for high availability (false = no)
-rds_db_backup_retention_period = 7  # Retention period for database backups (in days)
+rds_db_backup_retention_period = 1  # Retention period for database backups (in days)
 rds_db_skip_final_snapshot     = true  # Skip final snapshot when deleting RDS instance
 rds_db_storage_encrypted       = false  # Whether storage should be encrypted
 rds_db_parameter_group_name    = "default.postgres17"  # Parameter group for PostgreSQL
-rds_db_enable_iam_authentication = true  # Enable IAM authentication for database access
 
 # ==============================
 # Aurora Cluster Instance Configuration
@@ -91,3 +90,9 @@ lambda_handler = "lambda_handler.lambda_handler"  # Update the handler if needed
 lambda_role_name = "jasmit-se-demo-lambda-execution-role"  # Set the desired role name
 lambda_policy_name = "jasmit-se-demo-lambda-execution-policy"  # Set the desired policy name
 lambda_environment_variables = {}
+
+
+# ==============================
+# IAM Configuration
+# ==============================
+iam_role_and_policy_prefix = "jasmit-nebula-dash"

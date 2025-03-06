@@ -28,3 +28,19 @@ resource "aws_autoscaling_group" "asg" {
   health_check_type         = "EC2"
   health_check_grace_period = 300
 }
+
+# Usage Example
+/*
+module "asg" {
+  source                   = "./modules/aws/asg"
+  ec2_asg_desired_capacity = var.ec2_asg_desired_capacity
+  ec2_asg_max_size         = var.ec2_asg_max_size
+  ec2_asg_min_size         = var.ec2_asg_min_size
+  nsg_id                   = module.nsg.nsg_id
+  vpc_id                   = module.vpc.vpc_id
+  public_subnet_ids        = module.vpc.public_subnet_ids
+  launch_template_id       = module.launch_template.launch_template_id
+  tags                     = var.tags
+  user_prefix              = var.user_prefix
+}
+*/

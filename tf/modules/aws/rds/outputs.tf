@@ -1,6 +1,6 @@
-output "db_instance_endpoint" {
-  description = "The endpoint of the DB instance."
-  value       = aws_db_instance.default.endpoint
+output "db_instance" {
+  description = "The DB object"
+  value       = aws_db_instance.default
 }
 
 output "db_instance_arn" {
