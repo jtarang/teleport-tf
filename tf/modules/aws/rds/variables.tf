@@ -74,11 +74,6 @@ variable "rds_db_storage_encrypted" {
   type        = bool
 }
 
-variable "rds_db_enable_iam_authentication" {
-  description = "Enables IAM Authentication for RDS"
-  type        = bool
-}
-
 variable "rds_db_parameter_group_name" {
   description = "The DB parameter group name."
   type        = string

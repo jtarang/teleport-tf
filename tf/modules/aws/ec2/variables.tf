@@ -8,7 +8,6 @@ variable "instance_type" {
   type        = string
 }
 
-
 variable "ssh_key_name" {
   description = "The name of the SSH key pair to associate with the EC2 instances"
   type        = string
@@ -24,9 +23,9 @@ variable "launch_template_id" {
   type        = string
 }
 
-variable "public_subnet_id" {
-  description = "The ID of the public subnet where EC2 instances will be launched"
-  type        = string
+variable "public_subnet_ids" {
+  description = "The IDs of the public subnet where EC2 instances will be launched"
+  type        = list(string)
 }
 
 variable "ec2_bootstrap_script_path" {
@@ -41,4 +40,42 @@ variable "nsg_ids" {
 
 variable "user_prefix" {
   description = "User Prefix is used to make the resource owner identifiable"
+}
+
+variable "teleport_edition" {
+  description = "Teleport Edition to install i.e(cloud, enterprise, oss)"
+  type        = string
+}
+
+variable "teleport_address" {
+  description = "Teleport Domain/Address; this is grabbed from the local env vars from tctl"
+  type        = string
+}
+
+variable "teleport_node_join_token" {
+  description = "Teleport Node Join Token"
+  type        = string
+}
+
+variable "iam_instance_role_name" {
+  description = "The Name of the IAM role to be associated with EC2 instances profile."
+  type        = string
+}
+
+variable "database_name" {
+  description = "The name of the database"
+  type        = string
+  default     = ""
+}
+
+variable "database_uri" {
+  description = "The URI of the database"
+  type        = string
+  default     = ""
+}
+
+variable "database_protocol" {
+  description = "The protocol used to connect to the database"
+  type        = string
+  default     = ""
 }

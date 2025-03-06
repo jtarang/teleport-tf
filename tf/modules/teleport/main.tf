@@ -26,7 +26,7 @@ metadata = {
     }
 }
   spec = {
-    roles = ["Node"]
+    roles = ["Node", "Db"]
 
   }
   lifecycle {

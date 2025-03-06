@@ -25,6 +25,11 @@ module "nsg" {
   tags           = var.tags
 }
 
+module "iam" {
+  source = "./modules/aws/iam"
+  iam_role_and_policy_prefix = var.iam_role_and_policy_prefix
+}
+
 module "launch_template" {
   source                    = "./modules/aws/launch_template"
   launch_template_prefix    = var.user_prefix
@@ -38,6 +43,11 @@ module "launch_template" {
   teleport_edition          = var.teleport_edition
   teleport_address          = var.teleport_address
   teleport_node_join_token  = module.teleport.teleport_join_token
+  iam_instance_role_name = module.iam.rds_connect_discovery_role.name
+  database_name = module.rds.db_instance.db_name
+  database_protocol = module.rds.db_instance.engine
+  database_uri = module.rds.db_instance.endpoint
+  depends_on = [ module.iam.rds_connect_discovery_role, module.rds.db_instance ]
 }
 
 module "asg" {
@@ -53,30 +63,29 @@ module "asg" {
   user_prefix              = var.user_prefix
 }
 
-# module "rds_instance" {
-#   source                 = "./modules/aws/rds"
-#   rds_db_instance_identifier = var.rds_db_instance_identifier
-#   rds_db_username            = var.rds_db_username
-#   # DB Password is now managed in secrets manager
-#   rds_db_name                      = var.rds_db_name
-#   rds_db_port                      = var.rds_db_port
-#   rds_db_instance_class            = var.rds_db_instance_class
-#   rds_db_allocated_storage         = var.rds_db_allocated_storage
-#   rds_db_storage_type              = var.rds_db_storage_type
-#   rds_db_engine                    = var.rds_db_engine
-#   rds_db_engine_version            = var.rds_db_engine_version
-#   rds_db_publicly_accessible       = var.rds_db_publicly_accessible
-#   rds_db_enable_iam_authentication = var.rds_db_enable_iam_authentication
-#   rds_db_multi_az                  = var.rds_db_multi_az
-#   rds_db_backup_retention_period   = var.rds_db_backup_retention_period
-#   rds_db_skip_final_snapshot       = var.rds_db_skip_final_snapshot
-#   rds_db_storage_encrypted         = var.rds_db_storage_encrypted
-#   rds_db_parameter_group_name      = var.rds_db_parameter_group_name
-#   rds_db_security_group_ids        = [module.nsg.nsg_id]
-#   rds_db_tags                      = var.tags
-#   rds_db_subnet_group_name         = "${var.user_prefix}-rds-db-group"
-#   rds_db_subnet_ids                = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids])
-# }
+module "rds" {
+  source                 = "./modules/aws/rds"
+  rds_db_instance_identifier = var.rds_db_instance_identifier
+  rds_db_username            = var.rds_db_username
+  # DB Password is now managed in secrets manager
+  rds_db_name                      = var.rds_db_name
+  rds_db_port                      = var.rds_db_port
+  rds_db_instance_class            = var.rds_db_instance_class
+  rds_db_allocated_storage         = var.rds_db_allocated_storage
+  rds_db_storage_type              = var.rds_db_storage_type
+  rds_db_engine                    = var.rds_db_engine
+  rds_db_engine_version            = var.rds_db_engine_version
+  rds_db_publicly_accessible       = var.rds_db_publicly_accessible
+  rds_db_multi_az                  = var.rds_db_multi_az
+  rds_db_backup_retention_period   = var.rds_db_backup_retention_period
+  rds_db_skip_final_snapshot       = var.rds_db_skip_final_snapshot
+  rds_db_storage_encrypted         = var.rds_db_storage_encrypted
+  rds_db_parameter_group_name      = var.rds_db_parameter_group_name
+  rds_db_security_group_ids        = [module.nsg.nsg_id]
+  rds_db_tags                      = var.tags
+  rds_db_subnet_group_name         = "${var.user_prefix}-rds-db-group"
+  rds_db_subnet_ids                = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids])
+}
 
 
 # module "eks" {

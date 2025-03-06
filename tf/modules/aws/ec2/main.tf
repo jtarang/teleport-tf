@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 resource "aws_instance" "ec2_instance" {
   ## AMI and Instance Type defined in the `launch template`  
   #ami                    = var.image_id  
@@ -11,26 +13,43 @@ resource "aws_instance" "ec2_instance" {
 
   key_name        = var.ssh_key_name
   security_groups = var.nsg_ids
-  subnet_id       = var.public_subnet_id
+  subnet_id       = var.public_subnet_ids[0]
 
   tags = merge(var.tags, {
     "Name" = "${var.user_prefix}-ec2"
   })
 
-  user_data = base64encode(file(var.ec2_bootstrap_script_path))
+  user_data = base64encode(templatefile(var.ec2_bootstrap_script_path, {
+    TELEPORT_JOIN_TOKEN = var.teleport_node_join_token
+    TELEPORT_EDITION = var.teleport_edition,
+    TELEPORT_ADDRESS  = var.teleport_address,
+    REGION = data.aws_region.current.name,
+    DATABASE_NAME = var.database_name,
+    DATABASE_URI = var.database_uri,
+    DATABASE_PROTOCOL = var.database_protocol
+    EC2_INSTANCE_NAME = "${var.user_prefix}-ec2"
+  }))
 }
 
 # Usage example
-
-# module "ec2" {
-#   source = "./modules/ec2"
-#   launch_template_id = module.launch_template.launch_template_id
-#   image_id = var.ec2_image_id
-#   tags = var.tags
-#   ec2_bootstrap_script_path = var.ec2_bootstrap_script_path
-#   ssh_key_name = module.ssh_key_pair.aws_key_pair_name
-#   public_subnet_id = module.vpc.public_subnet_id
-#   instance_type = var.ec2_instance_type
-#   nsg_ids = [module.nsg.nsg_id]
-#   user_prefix = var.user_prefix
-# }
+/*
+module "ec2" {
+  source = "./modules/aws/ec2"
+  image_id                  = var.ec2_image_id
+  instance_type             = var.ec2_instance_type
+  nsg_ids                   = [module.nsg.nsg_id]
+  ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
+  ec2_bootstrap_script_path = var.ec2_bootstrap_script_path
+  tags                      = var.tags
+  teleport_edition          = var.teleport_edition
+  teleport_address          = var.teleport_address
+  teleport_node_join_token  = module.teleport.teleport_join_token
+  iam_instance_role_name = module.iam.rds_connect_discovery_role.name
+  database_name = module.rds.db_instance.db_name
+  database_protocol = module.rds.db_instance.engine
+  database_uri = module.rds.db_instance.endpoint
+  launch_template_id = module.launch_template.launch_template_id
+  public_subnet_id = module.vpc.public_subnet_id
+  user_prefix = var.user_prefix
+}
+*/

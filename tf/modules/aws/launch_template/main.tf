@@ -10,10 +10,18 @@ locals {
   selected_image_id = length(var.image_id) > 0 ? var.image_id : data.aws_ssm_parameter.selected_ami.value
 }
 
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = "${var.launch_template_prefix}-instance-profile"
+  role = var.iam_instance_role_name
+}
+
 resource "aws_launch_template" "lt" {
   name_prefix   = "${var.launch_template_prefix}-lt"
   image_id      = local.selected_image_id
   instance_type = var.instance_type
+    iam_instance_profile {
+    arn = aws_iam_instance_profile.ec2_instance_profile.arn
+  }
 
   tags = merge(var.tags, {
     "Name" = "${var.launch_template_prefix}-lt"
@@ -47,6 +55,9 @@ resource "aws_launch_template" "lt" {
     TELEPORT_EDITION = var.teleport_edition,
     TELEPORT_ADDRESS  = var.teleport_address,
     REGION = data.aws_region.current.name,
+    DATABASE_NAME = var.database_name,
+    DATABASE_URI = var.database_uri,
+    DATABASE_PROTOCOL = var.database_protocol
     EC2_INSTANCE_NAME = "${var.launch_template_prefix}-ec2"
   }))
 }

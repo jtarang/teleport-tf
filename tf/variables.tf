@@ -181,11 +181,6 @@ variable "rds_db_parameter_group_name" {
   type        = string
 }
 
-variable "rds_db_enable_iam_authentication" {
-  description = "Enables IAM Authentication for RDS"
-  type        = bool
-}
-
 variable "aurora_cluster_identifier" {
   description = "The identifier for the Aurora DB cluster"
 }
@@ -261,4 +256,9 @@ variable "teleport_address" {
 variable "teleport_identity_file_base64" {
   description = "Teleport Identity File in base64"
   type = string
+}
+
+variable "iam_role_and_policy_prefix" {
+  description = "Prefix for IAM role and policy names"
+  type        = string
 }
