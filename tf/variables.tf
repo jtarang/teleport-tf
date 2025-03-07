@@ -50,27 +50,52 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "ec2_asg_desired_capacity" {
+variable "linux_ec2_asg_desired_capacity" {
   description = "The desired capacity of the Auto Scaling group"
   type        = number
 }
 
-variable "ec2_asg_max_size" {
+variable "linux_ec2_asg_max_size" {
   description = "The maximum size of the Auto Scaling group"
   type        = number
 }
 
-variable "ec2_asg_min_size" {
+variable "linux_ec2_asg_min_size" {
   description = "The minimum size of the Auto Scaling group"
   type        = number
 }
 
-variable "ec2_bootstrap_script_path" {
+variable "linux_ec2_bootstrap_script_path" {
   description = "EC2 bootstrap or cloud-init script path"
   type        = string
 }
 
-variable "ec2_ami_ssm_parameter" {
+variable "linux_ec2_ami_ssm_parameter" {
+  description = "Path to latest ami SSM parameter"
+  type        = string
+}
+
+variable "windows_ec2_asg_desired_capacity" {
+  description = "The desired capacity of the Auto Scaling group"
+  type        = number
+}
+
+variable "windows_ec2_asg_max_size" {
+  description = "The maximum size of the Auto Scaling group"
+  type        = number
+}
+
+variable "windows_ec2_asg_min_size" {
+  description = "The minimum size of the Auto Scaling group"
+  type        = number
+}
+
+variable "windows_ec2_bootstrap_script_path" {
+  description = "EC2 bootstrap or cloud-init script path"
+  type        = string
+}
+
+variable "windows_ec2_ami_ssm_parameter" {
   description = "Path to latest ami SSM parameter"
   type        = string
 }

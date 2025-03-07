@@ -22,15 +22,26 @@ availability_zones        = ["us-west-1a", "us-west-1b"]  # Availability zones f
 # ==============================
 # EC2 Instance/ASG Configuration
 # ==============================
-ec2_asg_desired_capacity  = 1  # Desired capacity of EC2 Auto Scaling Group
-ec2_asg_min_size          = 1  # Minimum size of EC2 Auto Scaling Group
-ec2_asg_max_size          = 2  # Maximum size of EC2 Auto Scaling Group
-ec2_bootstrap_script_path = "../scripts/remote/install-teleport.sh"  # Path to EC2 bootstrap script
-ec2_ami_ssm_parameter     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"  # SSM parameter for AMI ID
-ec2_instance_type         = "t2.micro"  # EC2 instance type
-ec2_image_id              = ""  # Leave empty for dynamic selection via AWS API
-ssh_key_name              = "jasmit" # ${first_name} only, it gets appened with the region in the template # SSH key name for EC2 access
+linux_ec2_asg_desired_capacity  = 2  # Desired capacity of EC2 Auto Scaling Group
+linux_ec2_asg_min_size          = 1  # Minimum size of EC2 Auto Scaling Group
+linux_ec2_asg_max_size          = 2  # Maximum size of EC2 Auto Scaling Group
+linux_ec2_linux_bootstrap_script_path = "../scripts/remote/install-teleport.sh"  # Path to EC2 bootstrap script
+linux_ec2_linux_ami_ssm_parameter     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"  # SSM parameter for AMI ID
+linux_ec2_instance_type         = "t2.micro"  # EC2 instance type
+linux_ec2_image_id              = ""  # Leave empty for dynamic selection via AWS API
+
+# Windows
+windows_ec2_asg_desired_capacity  = 2  # Desired capacity of EC2 Auto Scaling Group
+windows_ec2_asg_min_size          = 1  # Minimum size of EC2 Auto Scaling Group
+windows_ec2_asg_max_size          = 2  # Maximum size of EC2 Auto Scaling Group
+windows_ec2_bootstrap_script_path = "../scripts/remote/install-teleport.ps1"  # Path to EC2 bootstrap script
+windows_ec2_ami_ssm_parameter     = "/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base"  # SSM parameter for AMI ID
+windows_ec2_instance_type         = "t3a.small"  # EC2 instance type
+windows_ec2_image_id              = ""  # Leave empty for dynamic selection via AWS API
+
+# Generic
 map_public_ip_on_launch   = true  # Enable public IP mapping on EC2 launch
+ssh_key_name              = "jasmit" # ${first_name} only, it gets appened with the region in the template # SSH key name for EC2 access
 
 
 # ==============================

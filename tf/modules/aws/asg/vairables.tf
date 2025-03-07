@@ -3,11 +3,6 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "nsg_id" {
-  description = "The ID of the security group to be associated with resources"
-  type        = string
-}
-
 variable "launch_template_id" {
   description = "The ID of the Launch Template for EC2 instances in the Auto Scaling Group"
   type        = string
