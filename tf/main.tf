@@ -34,8 +34,8 @@ module "iam" {
 module "windows_launch_template" {
   source                    = "./modules/aws/launch_template"
   launch_template_prefix    = "${var.user_prefix}-windows"
-  image_id                  = var.ec2_image_id
-  instance_type             = var.ec2_instance_type
+  image_id                  = var.windows_ec2_image_id
+  instance_type             = var.windows_ec2_instance_type
   nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
   ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
   ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
@@ -54,18 +54,18 @@ module "windows_asg" {
   ec2_asg_min_size         = var.windows_ec2_asg_min_size
   vpc_id                   = module.vpc.vpc_id
   public_subnet_ids        = module.vpc.public_subnet_ids
-  launch_template_id       = module.launch_template.launch_template_id
+  launch_template_id       = module.windows_launch_template.launch_template_id
   tags                     = var.tags
-  user_prefix              = var.user_prefix
+  user_prefix              = "${var.user_prefix}-windows"
 }
 
 module "linux_launch_template" {
   source                    = "./modules/aws/launch_template"
   launch_template_prefix    = "${var.user_prefix}-linux"
-  image_id                  = var.ec2_image_id
-  instance_type             = "t2.micro"
+  image_id                  = var.linux_ec2_image_id
+  instance_type             = var.linux_ec2_instance_type
   nsg_ids                   = [module.nsg.nsg_id]
-  ssh_key_name              = var.ssh_key_name
+  ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
   ec2_bootstrap_script_path = var.linux_ec2_bootstrap_script_path
   ec2_ami_ssm_parameter     = var.linux_ec2_ami_ssm_parameter
   tags                      = var.tags
@@ -81,9 +81,9 @@ module "linux_asg" {
   ec2_asg_min_size         = var.linux_ec2_asg_min_size
   vpc_id                   = module.vpc.vpc_id
   public_subnet_ids        = module.vpc.public_subnet_ids
-  launch_template_id       = module.launch_template.launch_template_id
+  launch_template_id       = module.linux_launch_template.launch_template_id
   tags                     = var.tags
-  user_prefix              = var.user_prefix
+  user_prefix              = "${var.user_prefix}-linux"
 }
 
 # module "rds" {

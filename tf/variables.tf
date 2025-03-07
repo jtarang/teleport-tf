@@ -31,16 +31,6 @@ variable "map_public_ip_on_launch" {
   type        = bool
 }
 
-variable "ec2_instance_type" {
-  description = "The instance type for the EC2 instance (e.g., t2.micro, m5.large)"
-  type        = string
-}
-
-variable "ec2_image_id" {
-  description = "The AMI (Amazon Machine Image) ID for the EC2 instance"
-  type        = string
-}
-
 variable "user_prefix" {
   description = "User Prefix is used to make the resource owner identifiable"
 }
@@ -48,6 +38,16 @@ variable "user_prefix" {
 variable "tags" {
   description = "A map of tags to apply to the resource"
   type        = map(string)
+}
+
+variable "linux_ec2_instance_type" {
+  description = "value"
+  type = string
+}
+
+variable "linux_ec2_image_id" {
+  description = "The AMI (Amazon Machine Image) ID for the EC2 instance"
+  type        = string
 }
 
 variable "linux_ec2_asg_desired_capacity" {
@@ -72,6 +72,16 @@ variable "linux_ec2_bootstrap_script_path" {
 
 variable "linux_ec2_ami_ssm_parameter" {
   description = "Path to latest ami SSM parameter"
+  type        = string
+}
+
+variable "windows_ec2_instance_type" {
+  description = "value"
+  type = string
+}
+
+variable "windows_ec2_image_id" {
+  description = "The AMI (Amazon Machine Image) ID for the EC2 instance"
   type        = string
 }
 
