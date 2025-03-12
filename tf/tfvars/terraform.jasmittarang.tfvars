@@ -58,7 +58,7 @@ eks_cluster_version       = "1.32"  # Kubernetes version for EKS cluster
 eks_node_instance_type    = "t2.micro"  # EC2 instance type for EKS worker nodes
 eks_node_desired_capacity = 1  # Desired number of worker nodes
 eks_node_min_capacity     = 1  # Minimum number of worker nodes
-eks_node_max_capacity     = 2  # Maximum number of worker nodes
+eks_node_max_capacity     = 1  # Maximum number of worker nodes
 
 # ==============================
 # Database Instance Configuration
@@ -79,6 +79,7 @@ rds_db_backup_retention_period = 1  # Retention period for database backups (in 
 rds_db_skip_final_snapshot     = true  # Skip final snapshot when deleting RDS instance
 rds_db_storage_encrypted       = false  # Whether storage should be encrypted
 rds_db_parameter_group_name    = "default.postgres17"  # Parameter group for PostgreSQL
+rds_db_teleport_admin_user     = "teleport-db-admin" # Teleport admin user to manage users
 
 # ==============================
 # Aurora Cluster Instance Configuration
@@ -90,6 +91,7 @@ aurora_db_instance_class         = "db.t4g.medium"   # Smallest compute for Auro
 aurora_db_publicly_accessible   = true            
 aurora_engine_version            = "16.6"           # Set a valid version for PostgreSQL (adjust if MySQL)
 aurora_engine_type               = "aurora-postgresql"  # or "aurora-mysql" depending on the engine you choose
+aurora_db_teleport_admin_user     = "teleport-db-admin" # Teleport admin user to manage users
 
 
 # ==============================

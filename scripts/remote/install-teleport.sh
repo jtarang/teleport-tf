@@ -52,6 +52,14 @@ db_service:
 EOF
 fi
 
+# Check for the existence of DATABASE_NAME, DATABASE_PROTOCOL, DATABASE_URI and append the db_service block if they exist
+if [[ -n "${DATABASE_TELEPORT_ADMIN_USER}" ]]; then
+  cat<<EOF >>/etc/teleport.yaml
+    admin_user:
+      "name": "${DATABASE_TELEPORT_ADMIN_USER}"
+EOF
+fi
+
 systemctl enable teleport
 systemctl start teleport
 systemctl status teleport

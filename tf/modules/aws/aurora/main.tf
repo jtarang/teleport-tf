@@ -36,6 +36,33 @@ resource "aws_rds_cluster_instance" "aurora_instance" {
   })
 }
 
+data "aws_secretsmanager_secret" "master_aurora_secret" {
+  arn = aws_rds_cluster.aurora_cluster.master_user_secret[0].secret_arn
+}
+
+data "aws_secretsmanager_secret_version" "master_aurora_secret_version" {
+  secret_id = data.aws_secretsmanager_secret.master_aurora_secret.id
+}
+
+# Decode the secret string (which is in JSON format)
+locals {
+  master_aurora_secret_data = jsondecode(data.aws_secretsmanager_secret_version.master_aurora_secret_version.secret_string)
+}
+
+resource "null_resource" "grant_iam_auth" {
+  depends_on = [aws_db_instance.default]
+
+  provisioner "local-exec" {
+    command = <<EOT
+      PGPASSWORD="${local.master_aurora_secret_data["password"]}" psql --host=${aws_rds_cluster_instance.aurora_instance.address} --port=${aws_rds_cluster.aurora_cluster.port} --username=${local.master_rds_secret_data["username"]} --dbname=${var.aurora_db_name} --no-password --set=sslmode=require <<SQL
+      CREATE USER "${var.aurora_db_teleport_admin_user}" LOGIN CREATEROLE;
+      GRANT rds_iam TO "${var.aurora_db_teleport_admin_user}" WITH ADMIN OPTION;
+      GRANT rds_superuser TO "${var.aurora_db_teleport_admin_user}";
+      SQL
+    EOT
+  }
+}
+
 # Usage Example
 /*
 module "aurora" {

@@ -216,6 +216,11 @@ variable "rds_db_parameter_group_name" {
   type        = string
 }
 
+variable "rds_db_teleport_admin_user" {
+  description = "Teleport Database Admin user to auto create and manage users"
+  type = string
+}
+
 variable "aurora_cluster_identifier" {
   description = "The identifier for the Aurora DB cluster"
 }
@@ -247,34 +252,34 @@ variable "aurora_engine_type" {
   type        = string
 }
 
+variable "aurora_db_teleport_admin_user" {
+  description = "Teleport Database Admin user to auto create and manage users"
+  type = string
+}
+
 variable "lambda_name" {
   description = "The name of the Lambda function"
   type        = string
-  default     = "my-lambda-function"  # You can change the default name
 }
 
 variable "lambda_runtime" {
   description = "The runtime environment for the Lambda function"
   type        = string
-  default     = "python3.8"  # Change to your desired Python version
 }
 
 variable "lambda_handler" {
   description = "The function handler for the Lambda function"
   type        = string
-  default     = "index.lambda_handler"  # Placeholder handler
 }
 
 variable "lambda_role_name" {
   description = "The name of the IAM role for Lambda execution"
   type        = string
-  default     = "lambda-execution-role"
 }
 
 variable "lambda_policy_name" {
   description = "The name of the IAM policy for Lambda"
   type        = string
-  default     = "lambda-execution-policy"
 }
 
 variable "lambda_environment_variables" {
