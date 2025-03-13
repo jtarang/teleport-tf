@@ -34,14 +34,14 @@ resource "aws_launch_template" "lt" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge(var.tags, {
+    tags = merge( { for k, v in var.tags : k == "teleport.dev/creator" ? "instance_metadata_tagging_req" : k => v }, {
       "Name" = "${var.launch_template_prefix}-ec2"
     })
   }
 
   tag_specifications {
     resource_type = "volume"
-    tags = merge(var.tags, {
+    tags = merge( { for k, v in var.tags : k == "teleport.dev/creator" ? "instance_metadata_tagging_req" : k => v }, {
       "Name" = "${var.launch_template_prefix}-ebs"
     })
   }
