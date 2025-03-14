@@ -54,9 +54,25 @@ auth_service:
 EOF
 
 # Check for the existence of DATABASE_NAME, DATABASE_PROTOCOL, DATABASE_URI and append the db_service block if they exist
-if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}" ]]; then
+if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}" && -n "${DATABASE_SECRET_ID}" ]]; then
   DATABASE_HOST=$(echo "${DATABASE_URI}" | cut -d':' -f1)
   DATABASE_PORT=$(echo "${DATABASE_URI}" | cut -d':' -f2)
+
+  # Fetch the secret JSON using AWS CLI
+  DATABASE_SECRET_JSON=$(/usr/local/bin/aws secretsmanager get-secret-value --secret-id "${DATABASE_SECRET_ID}" --region "$REGION" --query SecretString --output text)
+  export PGUSER=$(echo "$DATABASE_SECRET_JSON" | jq -r '.username')
+  export PGPASSWORD=$(echo "$DATABASE_SECRET_JSON" | jq -r '.password')
+  export PGSSLMODE="require"
+
+  sudo amazon-linux-extras enable postgresql14
+  sudo yum install -y postgresql
+
+  # Run psql command with the exported variables
+  psql --host="$DATABASE_HOST" --port="$DATABASE_PORT" --username="$PGUSER" --dbname="${DATABASE_NAME}" <<SQL
+  CREATE USER "${DATABASE_TELEPORT_ADMIN_USER}" LOGIN CREATEROLE;
+  GRANT rds_iam TO "${DATABASE_TELEPORT_ADMIN_USER}" WITH ADMIN OPTION;
+  GRANT rds_superuser TO "${DATABASE_TELEPORT_ADMIN_USER}";
+SQL
 
   cat<<EOF >>/etc/teleport.yaml
 db_service:

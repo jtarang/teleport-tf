@@ -49,6 +49,7 @@ locals {
   master_aurora_secret_data = jsondecode(data.aws_secretsmanager_secret_version.master_aurora_secret_version.secret_string)
 }
 
+/*
 resource "null_resource" "grant_iam_auth" {
   depends_on = [aws_db_instance.default]
 
@@ -71,6 +72,7 @@ resource "null_resource" "grant_iam_auth" {
     EOT
   }
 }
+*/
 
 # Usage Example
 /*

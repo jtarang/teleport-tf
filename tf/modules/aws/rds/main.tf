@@ -9,7 +9,7 @@ resource "aws_db_subnet_group" "main" {
   })
 }
 
-resource "aws_db_instance" "default" {
+resource "aws_db_instance" "demo_rds" {
   identifier        = var.rds_db_instance_identifier
   allocated_storage = var.rds_db_allocated_storage
   storage_type      = var.rds_db_storage_type
@@ -37,7 +37,7 @@ resource "aws_db_instance" "default" {
 }
 
 data "aws_secretsmanager_secret" "master_rds_secret" {
-  arn = aws_db_instance.default.master_user_secret[0].secret_arn
+  arn = aws_db_instance.demo_rds.master_user_secret[0].secret_arn
 }
 
 data "aws_secretsmanager_secret_version" "master_rds_secret_version" {
@@ -49,14 +49,15 @@ locals {
   master_rds_secret_data = jsondecode(data.aws_secretsmanager_secret_version.master_rds_secret_version.secret_string)
 }
 
+/*
 resource "null_resource" "grant_iam_auth" {
-  depends_on = [aws_db_instance.default]
+  depends_on = [aws_db_instance.demo_rds]
 
   provisioner "local-exec" {
     command = <<EOT
 # Export environment variables for PostgreSQL connection
-export PGHOST=${aws_db_instance.default.address}
-export PGPORT=${aws_db_instance.default.port}
+export PGHOST=${aws_db_instance.demo_rds.address}
+export PGPORT=${aws_db_instance.demo_rds.port}
 export PGUSER=${local.master_rds_secret_data["username"]}
 export PGPASSWORD='${local.master_rds_secret_data["password"]}'
 export PGDATABASE=${var.rds_db_name}
@@ -71,3 +72,4 @@ SQL
   EOT
   }
 }
+*/

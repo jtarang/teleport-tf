@@ -81,3 +81,8 @@ variable "database_teleport_admin_user" {
   type        = string
   default     = ""
 }
+
+variable "database_secret_id" {
+  description = "ID for the database secret"
+  default = ""
+}

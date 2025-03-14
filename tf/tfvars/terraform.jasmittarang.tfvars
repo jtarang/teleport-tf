@@ -1,7 +1,7 @@
 # ==============================
 # General Configuration
 # ==============================
-aws_region                = "us-west-1"  # AWS region for resources
+aws_region                = "us-east-1"  # AWS region for resources
 user_prefix               = "jasmit-se-demo"  # Prefix for user-specific resources
 
 # Tagging for resources
@@ -18,7 +18,7 @@ tags = {
 vpc_cidr_block            = "10.0.0.0/16"  # CIDR block for VPC
 public_subnet_cidrs       = ["10.0.1.0/24", "10.0.2.0/24"]  # CIDR blocks for public subnets
 private_subnet_cidrs      = ["10.0.3.0/24", "10.0.4.0/24"]  # CIDR blocks for private subnets
-availability_zones        = ["us-west-1a", "us-west-1b"]  # Availability zones for resource distribution
+availability_zones        = ["us-east-1a", "us-east-1b"]  # Availability zones for resource distribution
 
 # ==============================
 # EC2 Instance/ASG Configuration

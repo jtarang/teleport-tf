@@ -83,6 +83,7 @@ module "linux_launch_template" {
   database_protocol = module.rds.db_instance.engine
   database_uri = module.rds.db_instance.endpoint
   database_teleport_admin_user = var.rds_db_teleport_admin_user
+  database_secret_id = module.rds.db_secret_id
   depends_on = [ module.iam.rds_connect_discovery_role, module.rds.db_instance ]
 }
 
