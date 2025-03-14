@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set +x
+
 # Get Info Label Scripts
 sudo yum -y install git nmap
 git clone https://github.com/stevenGravy/teleportinfolabels.git /tmp/info_lables
@@ -54,12 +56,13 @@ EOF
 # Check for the existence of DATABASE_NAME, DATABASE_PROTOCOL, DATABASE_URI and append the db_service block if they exist
 if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}" ]]; then
   DATABASE_HOST=$(echo "${DATABASE_URI}" | cut -d':' -f1)
-  DATABASE_PORT=$(echo "${DATABASE_URI}" | cut -d':' -f2) 
+  DATABASE_PORT=$(echo "${DATABASE_URI}" | cut -d':' -f2)
+
   cat<<EOF >>/etc/teleport.yaml
 db_service:
   enabled: true
   databases:
-  - name: "${DATABASE_NAME}"
+  - name: "${DATABASE_NAME}-$RANDOM_SUFFIX"
     protocol: "${DATABASE_PROTOCOL}"
     uri: "${DATABASE_URI}"
     dynamic_labels:

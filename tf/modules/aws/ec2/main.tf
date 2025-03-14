@@ -18,7 +18,6 @@ resource "aws_instance" "ec2_instance" {
   tags = merge( { for k, v in var.tags : k == "teleport.dev/creator" ? "instance_metadata_tagging_req" : k => v }, {
     "Name" = "${var.user_prefix}-ec2"
   })
-
   user_data = base64encode(templatefile(var.ec2_bootstrap_script_path, {
     TELEPORT_JOIN_TOKEN = var.teleport_node_join_token
     TELEPORT_EDITION = var.teleport_edition,
@@ -26,7 +25,8 @@ resource "aws_instance" "ec2_instance" {
     REGION = data.aws_region.current.name,
     DATABASE_NAME = var.database_name,
     DATABASE_URI = var.database_uri,
-    DATABASE_PROTOCOL = var.database_protocol
+    DATABASE_PROTOCOL = var.database_protocol,
+    DATABASE_TELEPORT_ADMIN_USER = var.database_teleport_admin_user,
     EC2_INSTANCE_NAME = "${var.user_prefix}-ec2"
   }))
 }

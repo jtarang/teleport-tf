@@ -13,7 +13,7 @@ resource "aws_iam_policy" "rds_policy" {
           "ec2:DeleteTags",
           "ec2:CreateTags"
           ],
-        "Resource": "*"
+        Resource = "*"
       },
       {
         Sid    = "RDSAutoEnableIAMAuth"
@@ -46,7 +46,7 @@ resource "aws_iam_policy" "rds_policy" {
           "logs:PutLogEvents",
           "logs:CreateLogGroup"
         ],
-        "Resource" : "*"
+        Resource = "*"
       }
     ]
   })
