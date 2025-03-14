@@ -71,18 +71,3 @@ resource "null_resource" "grant_iam_auth" {
     EOT
   }
 }
-
-
-# resource "null_resource" "grant_iam_auth" {
-#   depends_on = [aws_db_instance.default]
-
-#   provisioner "local-exec" {
-#     command = <<EOT
-#       PGPASSWORD="${local.master_rds_secret_data["password"]}" psql --host=${aws_db_instance.default.address} --port=${aws_db_instance.default.port} --username=${local.master_rds_secret_data["username"]} --dbname=${var.rds_db_name} --no-password --set=sslmode=require <<SQL
-#       CREATE USER "${var.rds_db_teleport_admin_user}" LOGIN CREATEROLE;
-#       GRANT rds_iam TO "${var.rds_db_teleport_admin_user}" WITH ADMIN OPTION;
-#       GRANT rds_superuser TO "${var.rds_db_teleport_admin_user}";
-#       SQL
-#     EOT
-#   }
-# }

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Get Info Label Scripts
-sudo yum -y install git
+sudo yum -y install git nmap
 git clone https://github.com/stevenGravy/teleportinfolabels.git /tmp/info_lables
 cd /tmp/info_lables && sudo chmod +x *.sh 
 cd /tmp/info_lables && sudo cp -rv *.sh /usr/local/bin/
