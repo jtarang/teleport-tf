@@ -54,9 +54,20 @@ resource "null_resource" "grant_iam_auth" {
 
   provisioner "local-exec" {
     command = <<EOT
-      PGPASSWORD="${local.master_rds_secret_data["password"]}" psql --host=${aws_db_instance.default.address} --port=${aws_db_instance.default.port} --username=${local.master_rds_secret_data["username"]} --dbname=${var.rds_db_name} --no-password --set=sslmode=require -c "GRANT rds_iam TO ${var.rds_db_username}"
+      # Export environment variables for PostgreSQL connection
+      export PGHOST=${aws_db_instance.default.address}
+      export PGPORT=${aws_db_instance.default.port}
+      export PGUSER=${local.master_rds_secret_data["username"]}
+      export PGPASSWORD='${local.master_rds_secret_data["password"]}'
+      export PGDATABASE=${var.rds_db_name}
+      export PGSSLMODE=require
+
+      # Run psql command with the exported variables
+      psql <<SQL
+      CREATE USER "${var.rds_db_teleport_admin_user}" LOGIN CREATEROLE;
+      GRANT rds_iam TO "${var.rds_db_teleport_admin_user}" WITH ADMIN OPTION;
+      GRANT rds_superuser TO "${var.rds_db_teleport_admin_user}";
+      SQL
     EOT
   }
 }
-
-

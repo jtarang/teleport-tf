@@ -9,6 +9,7 @@ tags = {
   "teleport.dev/creator" = "jasmit.tarang@goteleport.com"  # Creator's email
   "Owner"                = "Jasmit Tarang"  # Resource owner
   "Team"                 = "Solutions Engineering"  # Team responsible
+  "Environment"          = "Production"
 }
 
 # ==============================
@@ -22,15 +23,26 @@ availability_zones        = ["us-west-1a", "us-west-1b"]  # Availability zones f
 # ==============================
 # EC2 Instance/ASG Configuration
 # ==============================
-ec2_asg_desired_capacity  = 1  # Desired capacity of EC2 Auto Scaling Group
-ec2_asg_min_size          = 1  # Minimum size of EC2 Auto Scaling Group
-ec2_asg_max_size          = 2  # Maximum size of EC2 Auto Scaling Group
-ec2_bootstrap_script_path = "../scripts/remote/install-teleport.sh"  # Path to EC2 bootstrap script
-ec2_ami_ssm_parameter     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"  # SSM parameter for AMI ID
-ec2_instance_type         = "t2.micro"  # EC2 instance type
-ec2_image_id              = ""  # Leave empty for dynamic selection via AWS API
-ssh_key_name              = "jasmit" # ${first_name} only, it gets appened with the region in the template # SSH key name for EC2 access
+linux_ec2_asg_desired_capacity  = 1  # Desired capacity of EC2 Auto Scaling Group
+linux_ec2_asg_min_size          = 1  # Minimum size of EC2 Auto Scaling Group
+linux_ec2_asg_max_size          = 1  # Maximum size of EC2 Auto Scaling Group
+linux_ec2_bootstrap_script_path = "../scripts/remote/install-teleport.sh"  # Path to EC2 bootstrap script
+linux_ec2_ami_ssm_parameter     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"  # SSM parameter for AMI ID
+linux_ec2_instance_type         = "t2.micro"  # EC2 instance type
+linux_ec2_image_id              = ""  # Leave empty for dynamic selection via AWS API
+
+# Windows
+windows_ec2_asg_desired_capacity  = 1  # Desired capacity of EC2 Auto Scaling Group
+windows_ec2_asg_min_size          = 1  # Minimum size of EC2 Auto Scaling Group
+windows_ec2_asg_max_size          = 1  # Maximum size of EC2 Auto Scaling Group
+windows_ec2_bootstrap_script_path = "../scripts/remote/install-teleport.ps1"  # Path to EC2 bootstrap script
+windows_ec2_ami_ssm_parameter     = "/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base"  # SSM parameter for AMI ID
+windows_ec2_instance_type         = "t3a.small"  # EC2 instance type
+windows_ec2_image_id              = ""  # Leave empty for dynamic selection via AWS API
+
+# Generic
 map_public_ip_on_launch   = true  # Enable public IP mapping on EC2 launch
+ssh_key_name              = "jasmit-rsa" # ${first_name} only, it gets appened with the region in the template # SSH key name for EC2 access
 
 
 # ==============================
@@ -47,7 +59,7 @@ eks_cluster_version       = "1.32"  # Kubernetes version for EKS cluster
 eks_node_instance_type    = "t2.micro"  # EC2 instance type for EKS worker nodes
 eks_node_desired_capacity = 1  # Desired number of worker nodes
 eks_node_min_capacity     = 1  # Minimum number of worker nodes
-eks_node_max_capacity     = 2  # Maximum number of worker nodes
+eks_node_max_capacity     = 1  # Maximum number of worker nodes
 
 # ==============================
 # Database Instance Configuration
@@ -68,6 +80,7 @@ rds_db_backup_retention_period = 1  # Retention period for database backups (in 
 rds_db_skip_final_snapshot     = true  # Skip final snapshot when deleting RDS instance
 rds_db_storage_encrypted       = false  # Whether storage should be encrypted
 rds_db_parameter_group_name    = "default.postgres17"  # Parameter group for PostgreSQL
+rds_db_teleport_admin_user     = "teleport-db-admin" # Teleport admin user to manage users
 
 # ==============================
 # Aurora Cluster Instance Configuration
@@ -79,6 +92,7 @@ aurora_db_instance_class         = "db.t4g.medium"   # Smallest compute for Auro
 aurora_db_publicly_accessible   = true            
 aurora_engine_version            = "16.6"           # Set a valid version for PostgreSQL (adjust if MySQL)
 aurora_engine_type               = "aurora-postgresql"  # or "aurora-mysql" depending on the engine you choose
+aurora_db_teleport_admin_user     = "teleport-db-admin" # Teleport admin user to manage users
 
 
 # ==============================

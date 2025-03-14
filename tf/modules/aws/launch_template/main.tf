@@ -34,14 +34,14 @@ resource "aws_launch_template" "lt" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge(var.tags, {
+    tags = merge( { for k, v in var.tags : k == "teleport.dev/creator" ? "instance_metadata_tagging_req" : k => v }, {
       "Name" = "${var.launch_template_prefix}-ec2"
     })
   }
 
   tag_specifications {
     resource_type = "volume"
-    tags = merge(var.tags, {
+    tags = merge( { for k, v in var.tags : k == "teleport.dev/creator" ? "instance_metadata_tagging_req" : k => v }, {
       "Name" = "${var.launch_template_prefix}-ebs"
     })
   }
@@ -58,6 +58,7 @@ resource "aws_launch_template" "lt" {
     DATABASE_NAME = var.database_name,
     DATABASE_URI = var.database_uri,
     DATABASE_PROTOCOL = var.database_protocol
+    DATABASE_TELEPORT_ADMIN_USER = var.database_teleport_admin_user
     EC2_INSTANCE_NAME = "${var.launch_template_prefix}-ec2"
   }))
 }

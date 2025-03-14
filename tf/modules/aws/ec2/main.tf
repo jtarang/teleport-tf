@@ -15,7 +15,7 @@ resource "aws_instance" "ec2_instance" {
   security_groups = var.nsg_ids
   subnet_id       = var.public_subnet_ids[0]
 
-  tags = merge(var.tags, {
+  tags = merge( { for k, v in var.tags : k == "teleport.dev/creator" ? "instance_metadata_tagging_req" : k => v }, {
     "Name" = "${var.user_prefix}-ec2"
   })
 

@@ -31,16 +31,6 @@ variable "map_public_ip_on_launch" {
   type        = bool
 }
 
-variable "ec2_instance_type" {
-  description = "The instance type for the EC2 instance (e.g., t2.micro, m5.large)"
-  type        = string
-}
-
-variable "ec2_image_id" {
-  description = "The AMI (Amazon Machine Image) ID for the EC2 instance"
-  type        = string
-}
-
 variable "user_prefix" {
   description = "User Prefix is used to make the resource owner identifiable"
 }
@@ -50,27 +40,72 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "ec2_asg_desired_capacity" {
+variable "linux_ec2_instance_type" {
+  description = "value"
+  type = string
+}
+
+variable "linux_ec2_image_id" {
+  description = "The AMI (Amazon Machine Image) ID for the EC2 instance"
+  type        = string
+}
+
+variable "linux_ec2_asg_desired_capacity" {
   description = "The desired capacity of the Auto Scaling group"
   type        = number
 }
 
-variable "ec2_asg_max_size" {
+variable "linux_ec2_asg_max_size" {
   description = "The maximum size of the Auto Scaling group"
   type        = number
 }
 
-variable "ec2_asg_min_size" {
+variable "linux_ec2_asg_min_size" {
   description = "The minimum size of the Auto Scaling group"
   type        = number
 }
 
-variable "ec2_bootstrap_script_path" {
+variable "linux_ec2_bootstrap_script_path" {
   description = "EC2 bootstrap or cloud-init script path"
   type        = string
 }
 
-variable "ec2_ami_ssm_parameter" {
+variable "linux_ec2_ami_ssm_parameter" {
+  description = "Path to latest ami SSM parameter"
+  type        = string
+}
+
+variable "windows_ec2_instance_type" {
+  description = "value"
+  type = string
+}
+
+variable "windows_ec2_image_id" {
+  description = "The AMI (Amazon Machine Image) ID for the EC2 instance"
+  type        = string
+}
+
+variable "windows_ec2_asg_desired_capacity" {
+  description = "The desired capacity of the Auto Scaling group"
+  type        = number
+}
+
+variable "windows_ec2_asg_max_size" {
+  description = "The maximum size of the Auto Scaling group"
+  type        = number
+}
+
+variable "windows_ec2_asg_min_size" {
+  description = "The minimum size of the Auto Scaling group"
+  type        = number
+}
+
+variable "windows_ec2_bootstrap_script_path" {
+  description = "EC2 bootstrap or cloud-init script path"
+  type        = string
+}
+
+variable "windows_ec2_ami_ssm_parameter" {
   description = "Path to latest ami SSM parameter"
   type        = string
 }
@@ -181,6 +216,11 @@ variable "rds_db_parameter_group_name" {
   type        = string
 }
 
+variable "rds_db_teleport_admin_user" {
+  description = "Teleport Database Admin user to auto create and manage users"
+  type = string
+}
+
 variable "aurora_cluster_identifier" {
   description = "The identifier for the Aurora DB cluster"
 }
@@ -212,34 +252,34 @@ variable "aurora_engine_type" {
   type        = string
 }
 
+variable "aurora_db_teleport_admin_user" {
+  description = "Teleport Database Admin user to auto create and manage users"
+  type = string
+}
+
 variable "lambda_name" {
   description = "The name of the Lambda function"
   type        = string
-  default     = "my-lambda-function"  # You can change the default name
 }
 
 variable "lambda_runtime" {
   description = "The runtime environment for the Lambda function"
   type        = string
-  default     = "python3.8"  # Change to your desired Python version
 }
 
 variable "lambda_handler" {
   description = "The function handler for the Lambda function"
   type        = string
-  default     = "index.lambda_handler"  # Placeholder handler
 }
 
 variable "lambda_role_name" {
   description = "The name of the IAM role for Lambda execution"
   type        = string
-  default     = "lambda-execution-role"
 }
 
 variable "lambda_policy_name" {
   description = "The name of the IAM policy for Lambda"
   type        = string
-  default     = "lambda-execution-policy"
 }
 
 variable "lambda_environment_variables" {

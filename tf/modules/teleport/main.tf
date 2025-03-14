@@ -2,7 +2,7 @@ terraform {
   required_providers {
     teleport = {
       source  = "terraform.releases.teleport.dev/gravitational/teleport"
-      version = ">16.0.0"  
+      version = ">16.0.0"
     }
   }
 }
@@ -17,16 +17,16 @@ resource "random_string" "random_token" {
 resource "teleport_provision_token" "teleport_join_token" {
   version = "v2"
 
-metadata = {
+  metadata = {
     name    = random_string.random_token.result
     expires = timeadd(timestamp(), "30m")
 
     labels = {
       "teleport.dev/origin" = "dynamic" // This label is added on Teleport side by default
     }
-}
+  }
   spec = {
-    roles = ["Node", "Db"]
+    roles = ["Node", "Db", "WindowsDesktop"]
 
   }
   lifecycle {

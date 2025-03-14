@@ -93,3 +93,8 @@ variable "rds_db_tags" {
   description = "A map of tags to assign to the DB instance."
   type        = map(string)
 }
+
+variable "rds_db_teleport_admin_user" {
+  description = "Teleport Database Admin user to auto create and manage users"
+  type = string
+}

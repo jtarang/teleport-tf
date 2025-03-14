@@ -21,7 +21,7 @@ resource "aws_autoscaling_group" "asg" {
 
   tag {
     key                 = "Name"
-    value               = "${var.user_prefix}-asg"
+    value               = "${var.user_prefix}-asg-ec2"
     propagate_at_launch = true
   }
 
