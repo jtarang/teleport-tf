@@ -135,7 +135,6 @@ module "rds" {
   rds_db_subnet_ids                = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids])
 }
 
-/*
 module "eks" {
   source                 = "./modules/aws/eks"
   eks_cluster_name       = "${var.user_prefix}-eks"
@@ -148,4 +147,3 @@ module "eks" {
   eks_node_max_size      = var.eks_node_max_capacity
   tags                   = var.tags
 }
-*/
