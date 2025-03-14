@@ -54,7 +54,16 @@ resource "null_resource" "grant_iam_auth" {
 
   provisioner "local-exec" {
     command = <<EOT
-      PGPASSWORD="${local.master_aurora_secret_data["password"]}" psql --host=${aws_rds_cluster_instance.aurora_instance.address} --port=${aws_rds_cluster.aurora_cluster.port} --username=${local.master_rds_secret_data["username"]} --dbname=${var.aurora_db_name} --no-password --set=sslmode=require <<SQL
+      # Export environment variables for PostgreSQL connection
+      export PGHOST=${aws_db_instance.default.address}
+      export PGPORT=${aws_db_instance.default.port}
+      export PGUSER=${local.master_aurora_secret_data["username"]}
+      export PGPASSWORD='${local.master_aurora_secret_data["password"]}'
+      export PGDATABASE=${var.aurora_db_name}
+      export PGSSLMODE=require
+
+      # Run psql command with the exported variables
+      psql <<SQL
       CREATE USER "${var.aurora_db_teleport_admin_user}" LOGIN CREATEROLE;
       GRANT rds_iam TO "${var.aurora_db_teleport_admin_user}" WITH ADMIN OPTION;
       GRANT rds_superuser TO "${var.aurora_db_teleport_admin_user}";
