@@ -1,3 +1,9 @@
+resource "random_string" "random_reousurce_suffix" {
+  length  = 3
+  special = false
+  upper = false
+}
+
 module "external_data" {
   source = "./modules/external_data"
 }
@@ -78,7 +84,6 @@ module "linux_launch_template" {
   database_uri = module.rds.db_instance.endpoint
   database_teleport_admin_user = var.rds_db_teleport_admin_user
   depends_on = [ module.iam.rds_connect_discovery_role, module.rds.db_instance ]
-
 }
 
 module "linux_asg" {
@@ -112,11 +117,11 @@ module "ad_windows_ec2" {
 
 module "rds" {
   source                 = "./modules/aws/rds"
-  rds_db_instance_identifier = var.rds_db_instance_identifier
+  rds_db_instance_identifier = "${var.rds_db_instance_identifier}-${random_string.random_reousurce_suffix.result}"
   rds_db_username            = var.rds_db_username
   rds_db_teleport_admin_user = var.rds_db_teleport_admin_user
   # DB Password is now managed in secrets manager
-  rds_db_name                      = var.rds_db_name
+  rds_db_name                      = "${var.rds_db_name}"
   rds_db_port                      = var.rds_db_port
   rds_db_instance_class            = var.rds_db_instance_class
   rds_db_allocated_storage         = var.rds_db_allocated_storage

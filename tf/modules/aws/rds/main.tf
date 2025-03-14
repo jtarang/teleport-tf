@@ -44,7 +44,7 @@ data "aws_secretsmanager_secret_version" "master_rds_secret_version" {
   secret_id = data.aws_secretsmanager_secret.master_rds_secret.id
 }
 
-# Decode the secret string (which is in JSON format)
+#Decode the secret string (which is in JSON format)
 locals {
   master_rds_secret_data = jsondecode(data.aws_secretsmanager_secret_version.master_rds_secret_version.secret_string)
 }
@@ -54,20 +54,20 @@ resource "null_resource" "grant_iam_auth" {
 
   provisioner "local-exec" {
     command = <<EOT
-      # Export environment variables for PostgreSQL connection
-      export PGHOST=${aws_db_instance.default.address}
-      export PGPORT=${aws_db_instance.default.port}
-      export PGUSER=${local.master_rds_secret_data["username"]}
-      export PGPASSWORD='${local.master_rds_secret_data["password"]}'
-      export PGDATABASE=${var.rds_db_name}
-      export PGSSLMODE=require
+# Export environment variables for PostgreSQL connection
+export PGHOST=${aws_db_instance.default.address}
+export PGPORT=${aws_db_instance.default.port}
+export PGUSER=${local.master_rds_secret_data["username"]}
+export PGPASSWORD='${local.master_rds_secret_data["password"]}'
+export PGDATABASE=${var.rds_db_name}
+export PGSSLMODE=require
 
-      # Run psql command with the exported variables
-      psql <<SQL
-      CREATE USER "${var.rds_db_teleport_admin_user}" LOGIN CREATEROLE;
-      GRANT rds_iam TO "${var.rds_db_teleport_admin_user}" WITH ADMIN OPTION;
-      GRANT rds_superuser TO "${var.rds_db_teleport_admin_user}";
-      SQL
-    EOT
+# Run psql command with the exported variables
+psql <<SQL
+CREATE USER "${var.rds_db_teleport_admin_user}" LOGIN CREATEROLE;
+GRANT rds_iam TO "${var.rds_db_teleport_admin_user}" WITH ADMIN OPTION;
+GRANT rds_superuser TO "${var.rds_db_teleport_admin_user}";
+SQL
+  EOT
   }
 }

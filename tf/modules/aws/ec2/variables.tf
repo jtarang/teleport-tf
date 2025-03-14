@@ -79,3 +79,9 @@ variable "database_protocol" {
   type        = string
   default     = ""
 }
+
+variable "database_teleport_admin_user" {
+  description = "Teleport Admin User that can create and manage users"
+  type        = string
+  default     = ""
+}

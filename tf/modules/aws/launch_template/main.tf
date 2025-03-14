@@ -57,8 +57,8 @@ resource "aws_launch_template" "lt" {
     REGION = data.aws_region.current.name,
     DATABASE_NAME = var.database_name,
     DATABASE_URI = var.database_uri,
-    DATABASE_PROTOCOL = var.database_protocol
-    DATABASE_TELEPORT_ADMIN_USER = var.database_teleport_admin_user
+    DATABASE_PROTOCOL = var.database_protocol,
+    DATABASE_TELEPORT_ADMIN_USER = var.database_teleport_admin_user,
     EC2_INSTANCE_NAME = "${var.launch_template_prefix}-ec2"
   }))
 }

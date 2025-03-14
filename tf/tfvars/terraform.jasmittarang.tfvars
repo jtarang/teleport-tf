@@ -64,7 +64,7 @@ eks_node_max_capacity     = 1  # Maximum number of worker nodes
 # ==============================
 # Database Instance Configuration
 # ==============================
-rds_db_instance_identifier     = "jasmit-psql-rds"  # Identifier for RDS instance
+rds_db_instance_identifier     = "jasmit-psql-prd-rds"  # Identifier for RDS instance
 rds_db_username                = "jasmit"  # Database username
 # db_password is now managed in Secrets Manager
 rds_db_name                    = "jasmitTestDb"  # Name of the database
