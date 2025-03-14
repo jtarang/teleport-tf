@@ -3,7 +3,7 @@
 set +x
 
 # Get Info Label Scripts
-sudo yum -y install git nmap
+sudo yum -y install git nmap jq
 git clone https://github.com/stevenGravy/teleportinfolabels.git /tmp/info_lables
 cd /tmp/info_lables && sudo chmod +x *.sh 
 cd /tmp/info_lables && sudo cp -rv *.sh /usr/local/bin/
