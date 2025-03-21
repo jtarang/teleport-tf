@@ -302,3 +302,15 @@ variable "iam_role_and_policy_prefix" {
   description = "Prefix for IAM role and policy names"
   type        = string
 }
+
+variable "mongodb_uri" {
+  description = "MongoDB connection URI"
+  type        = string
+  default     = ""
+}
+
+variable "mongodb_teleport_display_name" {
+  description = "MongoDB Teleport display name"
+  type        = string
+  default     = ""
+}

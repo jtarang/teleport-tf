@@ -29,6 +29,8 @@ resource "aws_instance" "ec2_instance" {
     DATABASE_TELEPORT_ADMIN_USER = var.database_teleport_admin_user,
     DATABASE_SECRET_ID = var.database_secret_id,
     EC2_INSTANCE_NAME = "${var.user_prefix}-ec2"
+    MONGO_DB_URI = var.mongodb_uri
+    MONGO_DB_TELEPORT_DISPLAY_NAME = var.mongodb_teleport_display_name
   }))
 }
 

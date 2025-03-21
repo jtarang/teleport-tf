@@ -4,7 +4,7 @@ set +x
 
 # Get Info Label Scripts
 sudo yum -y install git nmap jq
-git clone https://github.com/stevenGravy/teleportinfolabels.git /tmp/info_lables
+git clone https://github.com/jtarang/teleportinfolabels.git /tmp/info_lables
 cd /tmp/info_lables && sudo chmod +x *.sh 
 cd /tmp/info_lables && sudo cp -rv *.sh /usr/local/bin/
 
@@ -96,6 +96,32 @@ if [[ -n "${DATABASE_TELEPORT_ADMIN_USER}" ]]; then
   cat<<EOF >>/etc/teleport.yaml
     admin_user:
       "name": "${DATABASE_TELEPORT_ADMIN_USER}"
+EOF
+fi
+
+if [[ -n "${MONGO_DB_TELEPORT_DISPLAY_NAME}" && -n "${MONGO_DB_URI}" ]]; then
+  cat <<EOF >> /etc/yum.repos.d/mongodb-org-8.0.repo
+[mongodb-org-8.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/8.0/\$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-8.0.asc
+EOF
+  
+sudo yum install -y mongodb-mongosh
+
+cat <<EOF >>/etc/teleport.yaml
+  - name: "${MONGO_DB_TELEPORT_DISPLAY_NAME}"
+    protocol: "mongodb"
+    uri: "${MONGO_DB_URI}"
+    dynamic_labels:
+    - name: "status"
+      command:
+        - getavail.sh
+        - "${MONGO_DB_URI}"
+        - 27017
+        - mongodb
 EOF
 fi
 
