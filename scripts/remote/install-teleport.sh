@@ -49,7 +49,9 @@ teleport:
       output: text
 ssh_service:
   enabled: true
-  commands: # https://goteleport.com/docs/admin-guides/management/diagnostics/
+  labels:
+    env: dev
+  commands: # https://goteleport.com/docs/admin-guides/management/admin/labels/
   - command:
     - getnodeinfo.sh
     name: stats
@@ -61,8 +63,14 @@ auth_service:
 app_service:
   enabled: "yes"
   apps:
-  - name: "nginx-app"
+  - name: "nginx-app-dev"
     uri: tcp://localhost:80
+    labels:
+      env: dev
+  - name: "nginx-app-prd"
+    uri: tcp://localhost:80
+    labels:
+      env: prd
 EOF
 
 # Check for the existence of DATABASE_NAME, DATABASE_PROTOCOL, DATABASE_URI and append the db_service block if they exist
@@ -81,6 +89,7 @@ if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}"
 
   # Run psql command with the exported variables
   psql --host="$DATABASE_HOST" --port="$DATABASE_PORT" --username="$PGUSER" --dbname="${DATABASE_NAME}" <<SQL
+  GRANT rds_iam TO $PGUSER;
   CREATE USER "${DATABASE_TELEPORT_ADMIN_USER}" LOGIN CREATEROLE;
   GRANT rds_iam TO "${DATABASE_TELEPORT_ADMIN_USER}" WITH ADMIN OPTION;
   GRANT rds_superuser TO "${DATABASE_TELEPORT_ADMIN_USER}";
@@ -93,6 +102,20 @@ db_service:
   - name: "${DATABASE_NAME}-$RANDOM_SUFFIX"
     protocol: "${DATABASE_PROTOCOL}"
     uri: "${DATABASE_URI}"
+    static_labels:
+      env: dev
+    dynamic_labels:
+    - name: "status"
+      command:
+        - getavail.sh
+        - $DATABASE_HOST
+        - $DATABASE_PORT
+        - ${DATABASE_PROTOCOL}
+  - name: "${DATABASE_NAME}-prd"
+    protocol: "${DATABASE_PROTOCOL}"
+    uri: "${DATABASE_URI}"
+    static_labels:
+      env: prd
     dynamic_labels:
     - name: "status"
       command:
@@ -124,9 +147,23 @@ EOF
 sudo yum install -y mongodb-mongosh
 
 cat <<EOF >>/etc/teleport.yaml
-  - name: "${MONGO_DB_TELEPORT_DISPLAY_NAME}"
+  - name: "${MONGO_DB_TELEPORT_DISPLAY_NAME}-dev"
     protocol: "mongodb"
     uri: "${MONGO_DB_URI}"
+    static_labels:
+      env: dev
+    dynamic_labels:
+    - name: "status"
+      command:
+        - getavail.sh
+        - "${MONGO_DB_URI}"
+        - 27017
+        - mongodb
+  - name: "${MONGO_DB_TELEPORT_DISPLAY_NAME}-prd"
+    protocol: "mongodb"
+    uri: "${MONGO_DB_URI}"
+    static_labels:
+      env: prd
     dynamic_labels:
     - name: "status"
       command:

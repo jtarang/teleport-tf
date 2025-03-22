@@ -110,3 +110,10 @@ lambda_environment_variables = {}
 # IAM Configuration
 # ==============================
 iam_role_and_policy_prefix = "jasmit-nebula-dash"
+
+
+# ==============================
+# MongoDB Configuration
+# ==============================
+mongodb_uri_ssm_parameter_key = "/teleport/jasmit/prd/resource/db/mongo/host"
+mongodb_teleport_display_name = "mongodb-atlas"

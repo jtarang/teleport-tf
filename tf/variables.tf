@@ -303,8 +303,8 @@ variable "iam_role_and_policy_prefix" {
   type        = string
 }
 
-variable "mongodb_uri" {
-  description = "MongoDB connection URI"
+variable "mongodb_uri_ssm_parameter_key" {
+  description = "MongoDB connection URI SSM Parameter Key"
   type        = string
   default     = ""
 }

@@ -4,6 +4,10 @@ resource "random_string" "random_reousurce_suffix" {
   upper = false
 }
 
+data "aws_ssm_parameter" "mongo_host" {
+  name = var.mongodb_uri_ssm_parameter_key
+}
+
 module "external_data" {
   source = "./modules/external_data"
 }
@@ -86,7 +90,7 @@ module "linux_launch_template" {
   database_secret_id = module.rds.db_secret_id
   depends_on = [ module.iam.rds_connect_discovery_role, module.rds.db_instance ]
   mongodb_teleport_display_name = var.mongodb_teleport_display_name
-  mongodb_uri = var.mongodb_uri
+  mongodb_uri = data.aws_ssm_parameter.mongo_host.value
 }
 
 module "linux_asg" {
