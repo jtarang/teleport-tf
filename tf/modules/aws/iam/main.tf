@@ -47,6 +47,13 @@ resource "aws_iam_policy" "rds_policy" {
           "logs:CreateLogGroup"
         ],
         Resource = "*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "secretsmanager:GetSecretValue"
+        ],
+        Resource = "*"
       }
     ]
   })

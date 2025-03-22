@@ -3,10 +3,17 @@
 set +x
 
 # Get Info Label Scripts
-sudo yum -y install git nmap
-git clone https://github.com/stevenGravy/teleportinfolabels.git /tmp/info_lables
+sudo yum -y update
+sudo yum -y install git nmap jq
+git clone https://github.com/jtarang/teleportinfolabels.git /tmp/info_lables
 cd /tmp/info_lables && sudo chmod +x *.sh 
 cd /tmp/info_lables && sudo cp -rv *.sh /usr/local/bin/
+
+
+sudo amazon-linux-extras install nginx1.12
+sudo systemctl start nginx
+sudo systemctl enable nginx
+sudo systemctl status nginx 
 
 SESSION_TOKEN=$(curl -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" -X PUT "http://169.254.169.254/latest/api/token")
 INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $SESSION_TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
@@ -51,12 +58,33 @@ proxy_service:
   enabled: false
 auth_service:
   enabled: false
+app_service:
+  enabled: "yes"
+  apps:
+  - name: "nginx-app"
+    uri: tcp://localhost:80
 EOF
 
 # Check for the existence of DATABASE_NAME, DATABASE_PROTOCOL, DATABASE_URI and append the db_service block if they exist
-if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}" ]]; then
+if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}" && -n "${DATABASE_SECRET_ID}" ]]; then
   DATABASE_HOST=$(echo "${DATABASE_URI}" | cut -d':' -f1)
   DATABASE_PORT=$(echo "${DATABASE_URI}" | cut -d':' -f2)
+
+  # Fetch the secret JSON using AWS CLI
+  DATABASE_SECRET_JSON=$(/usr/local/bin/aws secretsmanager get-secret-value --secret-id "${DATABASE_SECRET_ID}" --region "$REGION" --query SecretString --output text)
+  export PGUSER=$(echo "$DATABASE_SECRET_JSON" | jq -r '.username')
+  export PGPASSWORD=$(echo "$DATABASE_SECRET_JSON" | jq -r '.password')
+  export PGSSLMODE="require"
+
+  sudo amazon-linux-extras enable postgresql14
+  sudo yum install -y postgresql
+
+  # Run psql command with the exported variables
+  psql --host="$DATABASE_HOST" --port="$DATABASE_PORT" --username="$PGUSER" --dbname="${DATABASE_NAME}" <<SQL
+  CREATE USER "${DATABASE_TELEPORT_ADMIN_USER}" LOGIN CREATEROLE;
+  GRANT rds_iam TO "${DATABASE_TELEPORT_ADMIN_USER}" WITH ADMIN OPTION;
+  GRANT rds_superuser TO "${DATABASE_TELEPORT_ADMIN_USER}";
+SQL
 
   cat<<EOF >>/etc/teleport.yaml
 db_service:
@@ -80,6 +108,32 @@ if [[ -n "${DATABASE_TELEPORT_ADMIN_USER}" ]]; then
   cat<<EOF >>/etc/teleport.yaml
     admin_user:
       "name": "${DATABASE_TELEPORT_ADMIN_USER}"
+EOF
+fi
+
+if [[ -n "${MONGO_DB_TELEPORT_DISPLAY_NAME}" && -n "${MONGO_DB_URI}" ]]; then
+  cat <<EOF >> /etc/yum.repos.d/mongodb-org-8.0.repo
+[mongodb-org-8.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/8.0/\$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-8.0.asc
+EOF
+  
+sudo yum install -y mongodb-mongosh
+
+cat <<EOF >>/etc/teleport.yaml
+  - name: "${MONGO_DB_TELEPORT_DISPLAY_NAME}"
+    protocol: "mongodb"
+    uri: "${MONGO_DB_URI}"
+    dynamic_labels:
+    - name: "status"
+      command:
+        - getavail.sh
+        - "${MONGO_DB_URI}"
+        - 27017
+        - mongodb
 EOF
 fi
 

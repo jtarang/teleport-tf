@@ -37,33 +37,33 @@ module "iam" {
   iam_role_and_policy_prefix = var.iam_role_and_policy_prefix
 }
 
-module "windows_launch_template" {
-  source                    = "./modules/aws/launch_template"
-  launch_template_prefix    = "${var.user_prefix}-windows"
-  image_id                  = var.windows_ec2_image_id
-  instance_type             = var.windows_ec2_instance_type
-  nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
-  ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
-  ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
-  ec2_ami_ssm_parameter     = var.windows_ec2_ami_ssm_parameter
-  tags                      = var.tags
-  teleport_edition          = var.teleport_edition
-  teleport_address          = var.teleport_address
-  teleport_node_join_token  = module.teleport.teleport_join_token
-  iam_instance_role_name = module.iam.rds_connect_discovery_role.name
-}
+# module "windows_launch_template" {
+#   source                    = "./modules/aws/launch_template"
+#   launch_template_prefix    = "${var.user_prefix}-windows"
+#   image_id                  = var.windows_ec2_image_id
+#   instance_type             = var.windows_ec2_instance_type
+#   nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
+#   ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
+#   ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
+#   ec2_ami_ssm_parameter     = var.windows_ec2_ami_ssm_parameter
+#   tags                      = var.tags
+#   teleport_edition          = var.teleport_edition
+#   teleport_address          = var.teleport_address
+#   teleport_node_join_token  = module.teleport.teleport_join_token
+#   iam_instance_role_name = module.iam.rds_connect_discovery_role.name
+# }
 
-module "windows_asg" {
-  source                   = "./modules/aws/asg"
-  ec2_asg_desired_capacity = var.windows_ec2_asg_desired_capacity
-  ec2_asg_max_size         = var.windows_ec2_asg_max_size
-  ec2_asg_min_size         = var.windows_ec2_asg_min_size
-  vpc_id                   = module.vpc.vpc_id
-  public_subnet_ids        = module.vpc.public_subnet_ids
-  launch_template_id       = module.windows_launch_template.launch_template_id
-  tags                     = var.tags
-  user_prefix              = "${var.user_prefix}-windows"
-}
+# module "windows_asg" {
+#   source                   = "./modules/aws/asg"
+#   ec2_asg_desired_capacity = var.windows_ec2_asg_desired_capacity
+#   ec2_asg_max_size         = var.windows_ec2_asg_max_size
+#   ec2_asg_min_size         = var.windows_ec2_asg_min_size
+#   vpc_id                   = module.vpc.vpc_id
+#   public_subnet_ids        = module.vpc.public_subnet_ids
+#   launch_template_id       = module.windows_launch_template.launch_template_id
+#   tags                     = var.tags
+#   user_prefix              = "${var.user_prefix}-windows"
+# }
 
 module "linux_launch_template" {
   source                    = "./modules/aws/launch_template"
@@ -83,7 +83,10 @@ module "linux_launch_template" {
   database_protocol = module.rds.db_instance.engine
   database_uri = module.rds.db_instance.endpoint
   database_teleport_admin_user = var.rds_db_teleport_admin_user
+  database_secret_id = module.rds.db_secret_id
   depends_on = [ module.iam.rds_connect_discovery_role, module.rds.db_instance ]
+  mongodb_teleport_display_name = var.mongodb_teleport_display_name
+  mongodb_uri = var.mongodb_uri
 }
 
 module "linux_asg" {
@@ -98,22 +101,22 @@ module "linux_asg" {
   user_prefix              = "${var.user_prefix}-linux"
 }
 
-module "ad_windows_ec2" {
-  source = "./modules/aws/ec2"
-  image_id                  = var.windows_ec2_image_id
-  instance_type             = var.windows_ec2_instance_type
-  nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
-  ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
-  ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
-  tags                      = var.tags
-  teleport_edition          = var.teleport_edition
-  teleport_address          = var.teleport_address
-  teleport_node_join_token  = module.teleport.teleport_join_token
-  iam_instance_role_name = module.iam.rds_connect_discovery_role.name
-  launch_template_id = module.windows_launch_template.launch_template_id
-  public_subnet_ids = module.vpc.public_subnet_ids
-  user_prefix              = "${var.user_prefix}-ad-windows"
-}
+# module "ad_windows_ec2" {
+#   source = "./modules/aws/ec2"
+#   image_id                  = var.windows_ec2_image_id
+#   instance_type             = var.windows_ec2_instance_type
+#   nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
+#   ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
+#   ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
+#   tags                      = var.tags
+#   teleport_edition          = var.teleport_edition
+#   teleport_address          = var.teleport_address
+#   teleport_node_join_token  = module.teleport.teleport_join_token
+#   iam_instance_role_name = module.iam.rds_connect_discovery_role.name
+#   launch_template_id = module.windows_launch_template.launch_template_id
+#   public_subnet_ids = module.vpc.public_subnet_ids
+#   user_prefix              = "${var.user_prefix}-ad-windows"
+# }
 
 module "rds" {
   source                 = "./modules/aws/rds"
@@ -140,15 +143,15 @@ module "rds" {
   rds_db_subnet_ids                = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids])
 }
 
-module "eks" {
-  source                 = "./modules/aws/eks"
-  eks_cluster_name       = "${var.user_prefix}-eks"
-  eks_cluster_version    = var.eks_cluster_version
-  eks_subnet_ids         = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids]) # Flattening the list of subnet IDs
-  eks_security_group_ids = [module.nsg.nsg_id]
-  eks_node_instance_type = var.eks_node_instance_type
-  eks_node_count         = var.eks_node_desired_capacity
-  eks_node_min_size      = var.eks_node_min_capacity
-  eks_node_max_size      = var.eks_node_max_capacity
-  tags                   = var.tags
-}
+# module "eks" {
+#   source                 = "./modules/aws/eks"
+#   eks_cluster_name       = "${var.user_prefix}-eks"
+#   eks_cluster_version    = var.eks_cluster_version
+#   eks_subnet_ids         = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids]) # Flattening the list of subnet IDs
+#   eks_security_group_ids = [module.nsg.nsg_id]
+#   eks_node_instance_type = var.eks_node_instance_type
+#   eks_node_count         = var.eks_node_desired_capacity
+#   eks_node_min_size      = var.eks_node_min_capacity
+#   eks_node_max_size      = var.eks_node_max_capacity
+#   tags                   = var.tags
+# }

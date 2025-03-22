@@ -81,3 +81,20 @@ variable "database_teleport_admin_user" {
   type        = string
   default     = ""
 }
+
+variable "database_secret_id" {
+  description = "ID for the database secret"
+  default = ""
+}
+
+variable "mongodb_uri" {
+  description = "MongoDB connection URI"
+  type        = string
+  default     = ""
+}
+
+variable "mongodb_teleport_display_name" {
+  description = "MongoDB Teleport display name"
+  type        = string
+  default     = ""
+}
