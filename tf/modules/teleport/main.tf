@@ -26,7 +26,7 @@ resource "teleport_provision_token" "teleport_join_token" {
     }
   }
   spec = {
-    roles = ["Node", "Db", "WindowsDesktop"]
+    roles = ["Node", "Db", "WindowsDesktop", "App"]
 
   }
   lifecycle {

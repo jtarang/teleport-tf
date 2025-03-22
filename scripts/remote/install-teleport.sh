@@ -3,10 +3,17 @@
 set +x
 
 # Get Info Label Scripts
+sudo yum -y update
 sudo yum -y install git nmap jq
 git clone https://github.com/jtarang/teleportinfolabels.git /tmp/info_lables
 cd /tmp/info_lables && sudo chmod +x *.sh 
 cd /tmp/info_lables && sudo cp -rv *.sh /usr/local/bin/
+
+
+sudo amazon-linux-extras install nginx1.12
+sudo systemctl start nginx
+sudo systemctl enable nginx
+sudo systemctl status nginx 
 
 SESSION_TOKEN=$(curl -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" -X PUT "http://169.254.169.254/latest/api/token")
 INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $SESSION_TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
@@ -51,6 +58,11 @@ proxy_service:
   enabled: false
 auth_service:
   enabled: false
+app_service:
+  enabled: "yes"
+  apps:
+  - name: "nginx-app"
+    uri: tcp://localhost:80
 EOF
 
 # Check for the existence of DATABASE_NAME, DATABASE_PROTOCOL, DATABASE_URI and append the db_service block if they exist
