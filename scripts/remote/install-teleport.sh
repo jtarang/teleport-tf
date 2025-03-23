@@ -5,9 +5,9 @@ set +x
 # Get Info Label Scripts
 sudo yum -y update
 sudo yum -y install git nmap jq
-git clone https://github.com/jtarang/teleportinfolabels.git /tmp/info_lables
-cd /tmp/info_lables && sudo chmod +x *.sh 
-cd /tmp/info_lables && sudo cp -rv *.sh /usr/local/bin/
+git clone https://github.com/jtarang/teleportinfolabels.git /tmp/info_labels
+cd /tmp/info_labels && sudo chmod +x *.sh 
+cd /tmp/info_labels && sudo cp -rv *.sh /usr/local/bin/
 
 
 sudo amazon-linux-extras install nginx1.12
@@ -27,8 +27,9 @@ sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --u
 /usr/local/bin/aws ec2 create-tags --resources $INSTANCE_ID   --tags Key=InstanceID,Value=$INSTANCE_ID
 /usr/local/bin/aws ec2 modify-instance-metadata-options --instance-id $INSTANCE_ID --http-endpoint enabled --instance-metadata-tags enabled  --region $REGION
 
-RANDOM_SUFFIX=$(openssl rand -base64 2 | tr -dc 'a-zA-Z0-9' | tr '[:upper:]' '[:lower:]')
-sudo hostnamectl set-hostname "${EC2_INSTANCE_NAME}-$RANDOM_SUFFIX"
+#RANDOM_SUFFIX=$(openssl rand -base64 2 | tr -dc 'a-zA-Z0-9' | tr '[:upper:]' '[:lower:]')
+sudo hostnamectl set-hostname "$(echo "${EC2_INSTANCE_NAME}" | sed 's/'"${TELEPORT_DISPLAY_NAME_STRIP_STRING}"'//g')"
+
 
 TELEPORT_VERSION="$(curl https://${TELEPORT_ADDRESS}/v1/webapi/automaticupgrades/channel/default/version | sed 's/v//')"
 curl https://cdn.teleport.dev/install.sh | bash -s $TELEPORT_VERSION ${TELEPORT_EDITION}
@@ -50,7 +51,7 @@ teleport:
 ssh_service:
   enabled: true
   labels:
-    env: dev
+    env: ${ENVIRONMENT_TAG}
   commands: # https://goteleport.com/docs/admin-guides/management/admin/labels/
   - command:
     - getnodeinfo.sh
@@ -63,20 +64,17 @@ auth_service:
 app_service:
   enabled: "yes"
   apps:
-  - name: "nginx-app-dev"
+  - name: "${ENVIRONMENT_TAG}-nginx-app"
     uri: tcp://localhost:80
     labels:
-      env: dev
-  - name: "nginx-app-prd"
-    uri: tcp://localhost:80
-    labels:
-      env: prd
+      env: ${ENVIRONMENT_TAG}
 EOF
 
 # Check for the existence of DATABASE_NAME, DATABASE_PROTOCOL, DATABASE_URI and append the db_service block if they exist
 if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}" && -n "${DATABASE_SECRET_ID}" ]]; then
   DATABASE_HOST=$(echo "${DATABASE_URI}" | cut -d':' -f1)
   DATABASE_PORT=$(echo "${DATABASE_URI}" | cut -d':' -f2)
+  TELEPORT_DATABASE_DISPLAY_NAME=$(echo "${DATABASE_URI}" | cut -d'.' -f1 | sed 's/'"${TELEPORT_DISPLAY_NAME_STRIP_STRING}"'//g')
 
   # Fetch the secret JSON using AWS CLI
   DATABASE_SECRET_JSON=$(/usr/local/bin/aws secretsmanager get-secret-value --secret-id "${DATABASE_SECRET_ID}" --region "$REGION" --query SecretString --output text)
@@ -99,23 +97,11 @@ SQL
 db_service:
   enabled: true
   databases:
-  - name: "${DATABASE_NAME}-$RANDOM_SUFFIX"
+  - name: "${ENVIRONMENT_TAG}-$TELEPORT_DATABASE_DISPLAY_NAME"
     protocol: "${DATABASE_PROTOCOL}"
     uri: "${DATABASE_URI}"
     static_labels:
-      env: dev
-    dynamic_labels:
-    - name: "status"
-      command:
-        - getavail.sh
-        - $DATABASE_HOST
-        - $DATABASE_PORT
-        - ${DATABASE_PROTOCOL}
-  - name: "${DATABASE_NAME}-prd"
-    protocol: "${DATABASE_PROTOCOL}"
-    uri: "${DATABASE_URI}"
-    static_labels:
-      env: prd
+      env: ${ENVIRONMENT_TAG}
     dynamic_labels:
     - name: "status"
       command:
@@ -147,23 +133,11 @@ EOF
 sudo yum install -y mongodb-mongosh
 
 cat <<EOF >>/etc/teleport.yaml
-  - name: "${MONGO_DB_TELEPORT_DISPLAY_NAME}-dev"
+  - name: "${ENVIRONMENT_TAG}-${MONGO_DB_TELEPORT_DISPLAY_NAME}"
     protocol: "mongodb"
     uri: "${MONGO_DB_URI}"
     static_labels:
-      env: dev
-    dynamic_labels:
-    - name: "status"
-      command:
-        - getavail.sh
-        - "${MONGO_DB_URI}"
-        - 27017
-        - mongodb
-  - name: "${MONGO_DB_TELEPORT_DISPLAY_NAME}-prd"
-    protocol: "mongodb"
-    uri: "${MONGO_DB_URI}"
-    static_labels:
-      env: prd
+      env: ${ENVIRONMENT_TAG}
     dynamic_labels:
     - name: "status"
       command:
@@ -177,4 +151,4 @@ fi
 systemctl enable teleport
 systemctl start teleport
 systemctl status teleport
-rm -rf /tmp/info_lables
+rm -rf /tmp/info_labels

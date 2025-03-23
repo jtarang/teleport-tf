@@ -31,6 +31,8 @@ resource "aws_instance" "ec2_instance" {
     EC2_INSTANCE_NAME = "${var.user_prefix}-ec2"
     MONGO_DB_URI = var.mongodb_uri
     MONGO_DB_TELEPORT_DISPLAY_NAME = var.mongodb_teleport_display_name
+    TELEPORT_DISPLAY_NAME_STRIP_STRING = var.teleport_display_name_strip_string
+    ENVIRONMENT_TAG = var.environment_tag
   }))
 }
 

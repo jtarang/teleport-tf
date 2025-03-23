@@ -102,3 +102,13 @@ variable "mongodb_teleport_display_name" {
   type        = string
   default     = ""
 }
+
+variable "teleport_display_name_strip_string" {
+  description = "Strip any value to node and db names for Teleport Display Names"
+  default = " "
+}
+
+variable "environment_tag" {
+  description = "Environment Tag Value: dev, stg, prd"
+  default = "dev" 
+}
