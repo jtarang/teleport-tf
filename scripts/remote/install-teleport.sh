@@ -2,42 +2,57 @@
 
 set +x
 
-# Get Info Label Scripts
-sudo yum -y update
-sudo yum -y install git nmap jq
-git clone https://github.com/jtarang/teleportinfolabels.git /tmp/info_labels
-cd /tmp/info_labels && sudo chmod +x *.sh 
-cd /tmp/info_labels && sudo cp -rv *.sh /usr/local/bin/
-
-
-sudo amazon-linux-extras install nginx1.12
-sudo systemctl start nginx
-sudo systemctl enable nginx
-sudo systemctl status nginx 
-
 SESSION_TOKEN=$(curl -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" -X PUT "http://169.254.169.254/latest/api/token")
 INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $SESSION_TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
 REGION=$(curl -H "X-aws-ec2-metadata-token: $SESSION_TOKEN" -s http://169.254.169.254/latest/meta-data/placement/region)
 
-sudo yum -y remove awscli
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
-/usr/local/bin/aws ec2  delete-tags --resources $INSTANCE_ID --tags Key="teleport.dev/creator"
-/usr/local/bin/aws ec2 create-tags --resources $INSTANCE_ID   --tags Key=InstanceID,Value=$INSTANCE_ID
-/usr/local/bin/aws ec2 modify-instance-metadata-options --instance-id $INSTANCE_ID --http-endpoint enabled --instance-metadata-tags enabled  --region $REGION
+DATABASE_HOST=$(echo "${DATABASE_URI}" | cut -d':' -f1)
+DATABASE_PORT=$(echo "${DATABASE_URI}" | cut -d':' -f2)
+TELEPORT_DATABASE_DISPLAY_NAME=$(echo "${DATABASE_URI}" | cut -d'.' -f1 | sed 's/'"${TELEPORT_DISPLAY_NAME_STRIP_STRING}"'//g')
 
-#RANDOM_SUFFIX=$(openssl rand -base64 2 | tr -dc 'a-zA-Z0-9' | tr '[:upper:]' '[:lower:]')
-sudo hostnamectl set-hostname "$(echo "${EC2_INSTANCE_NAME}" | sed 's/'"${TELEPORT_DISPLAY_NAME_STRIP_STRING}"'//g')"
+install_dependencies() {
+    sudo yum -y update
+    sudo yum -y install git nmap jq
+}
 
+setup_info_labels() {
+    git clone https://github.com/jtarang/teleportinfolabels.git /tmp/info_labels
+    cd /tmp/info_labels && sudo chmod +x *.sh 
+    cd /tmp/info_labels && sudo cp -rv *.sh /usr/local/bin/
+}
 
-TELEPORT_VERSION="$(curl https://${TELEPORT_ADDRESS}/v1/webapi/automaticupgrades/channel/default/version | sed 's/v//')"
-curl https://cdn.teleport.dev/install.sh | bash -s $TELEPORT_VERSION ${TELEPORT_EDITION}
+setup_nginx() {
+    sudo amazon-linux-extras install nginx1.12
+    sudo systemctl start nginx
+    sudo systemctl enable nginx
+    sudo systemctl status nginx
+}
 
-echo ${TELEPORT_JOIN_TOKEN} > /tmp/token
+update_aws_cli() {
+    sudo yum -y remove awscli
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    unzip awscliv2.zip
+    sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+}
 
-# Start of teleport.yaml configuration
-cat<<EOF >/etc/teleport.yaml
+configure_aws_instance() {
+    /usr/local/bin/aws ec2 delete-tags --resources $INSTANCE_ID --tags Key="teleport.dev/creator"
+    /usr/local/bin/aws ec2 create-tags --resources $INSTANCE_ID --tags Key=InstanceID,Value=$INSTANCE_ID
+    /usr/local/bin/aws ec2 modify-instance-metadata-options --instance-id $INSTANCE_ID --http-endpoint enabled --instance-metadata-tags enabled --region $REGION
+}
+
+set_hostname() {
+    sudo hostnamectl set-hostname "$(echo "${EC2_INSTANCE_NAME}" | sed 's/'"${TELEPORT_DISPLAY_NAME_STRIP_STRING}"'//g')"
+}
+
+install_teleport() {
+    TELEPORT_VERSION="$(curl https://${TELEPORT_ADDRESS}/v1/webapi/automaticupgrades/channel/default/version | sed 's/v//')"
+    curl https://cdn.teleport.dev/install.sh | bash -s $TELEPORT_VERSION ${TELEPORT_EDITION}
+    echo ${TELEPORT_JOIN_TOKEN} > /tmp/token
+}
+
+configure_teleport_yaml() {
+    cat<<EOF >/etc/teleport.yaml
 version: v3
 teleport:
   auth_token: /tmp/token
@@ -52,7 +67,7 @@ ssh_service:
   enabled: true
   labels:
     env: ${ENVIRONMENT_TAG}
-  commands: # https://goteleport.com/docs/admin-guides/management/admin/labels/
+  commands:
   - command:
     - getnodeinfo.sh
     name: stats
@@ -69,31 +84,30 @@ app_service:
     labels:
       env: ${ENVIRONMENT_TAG}
 EOF
+}
 
-# Check for the existence of DATABASE_NAME, DATABASE_PROTOCOL, DATABASE_URI and append the db_service block if they exist
-if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}" && -n "${DATABASE_SECRET_ID}" ]]; then
-  DATABASE_HOST=$(echo "${DATABASE_URI}" | cut -d':' -f1)
-  DATABASE_PORT=$(echo "${DATABASE_URI}" | cut -d':' -f2)
-  TELEPORT_DATABASE_DISPLAY_NAME=$(echo "${DATABASE_URI}" | cut -d'.' -f1 | sed 's/'"${TELEPORT_DISPLAY_NAME_STRIP_STRING}"'//g')
+configure_postgresql_service() {
+    sudo amazon-linux-extras enable postgresql14
+    sudo yum install -y postgresql
+}
 
-  # Fetch the secret JSON using AWS CLI
-  DATABASE_SECRET_JSON=$(/usr/local/bin/aws secretsmanager get-secret-value --secret-id "${DATABASE_SECRET_ID}" --region "$REGION" --query SecretString --output text)
-  export PGUSER=$(echo "$DATABASE_SECRET_JSON" | jq -r '.username')
-  export PGPASSWORD=$(echo "$DATABASE_SECRET_JSON" | jq -r '.password')
-  export PGSSLMODE="require"
+setup_postgresql_db() {
+    # Fetch the secret JSON using AWS CLI
+    DATABASE_SECRET_JSON=$(/usr/local/bin/aws secretsmanager get-secret-value --secret-id "${DATABASE_SECRET_ID}" --region "$REGION" --query SecretString --output text)
+    export PGUSER=$(echo "$DATABASE_SECRET_JSON" | jq -r '.username')
+    export PGPASSWORD=$(echo "$DATABASE_SECRET_JSON" | jq -r '.password')
+    export PGSSLMODE="require"
 
-  sudo amazon-linux-extras enable postgresql14
-  sudo yum install -y postgresql
-
-  # Run psql command with the exported variables
-  psql --host="$DATABASE_HOST" --port="$DATABASE_PORT" --username="$PGUSER" --dbname="${DATABASE_NAME}" <<SQL
-  GRANT rds_iam TO $PGUSER;
-  CREATE USER "${DATABASE_TELEPORT_ADMIN_USER}" LOGIN CREATEROLE;
-  GRANT rds_iam TO "${DATABASE_TELEPORT_ADMIN_USER}" WITH ADMIN OPTION;
-  GRANT rds_superuser TO "${DATABASE_TELEPORT_ADMIN_USER}";
+    psql --host="$DATABASE_HOST" --port="$DATABASE_PORT" --username="$PGUSER" --dbname="${DATABASE_NAME}" <<SQL
+    GRANT rds_iam TO $PGUSER;
+    CREATE USER "${DATABASE_TELEPORT_ADMIN_USER}" LOGIN CREATEROLE;
+    GRANT rds_iam TO "${DATABASE_TELEPORT_ADMIN_USER}" WITH ADMIN OPTION;
+    GRANT rds_superuser TO "${DATABASE_TELEPORT_ADMIN_USER}";
 SQL
+}
 
-  cat<<EOF >>/etc/teleport.yaml
+configure_postgresql_service_block() {
+    cat<<EOF >>/etc/teleport.yaml
 db_service:
   enabled: true
   databases:
@@ -110,18 +124,20 @@ db_service:
         - $DATABASE_PORT
         - ${DATABASE_PROTOCOL}
 EOF
-fi
+}
 
-# Check for the existence of DATABASE_NAME, DATABASE_PROTOCOL, DATABASE_URI and append the db_service block if they exist
-if [[ -n "${DATABASE_TELEPORT_ADMIN_USER}" ]]; then
-  cat<<EOF >>/etc/teleport.yaml
+configure_admin_user() {
+    if [[ -n "${DATABASE_TELEPORT_ADMIN_USER}" ]]; then
+        cat<<EOF >>/etc/teleport.yaml
     admin_user:
       "name": "${DATABASE_TELEPORT_ADMIN_USER}"
 EOF
-fi
+    fi
+}
 
-if [[ -n "${MONGO_DB_TELEPORT_DISPLAY_NAME}" && -n "${MONGO_DB_URI}" ]]; then
-  cat <<EOF >> /etc/yum.repos.d/mongodb-org-8.0.repo
+setup_mongodb_service() {
+    if [[ -n "${MONGO_DB_TELEPORT_DISPLAY_NAME}" && -n "${MONGO_DB_URI}" ]]; then
+        cat <<EOF >> /etc/yum.repos.d/mongodb-org-8.0.repo
 [mongodb-org-8.0]
 name=MongoDB Repository
 baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/8.0/\$basearch/
@@ -129,10 +145,10 @@ gpgcheck=1
 enabled=1
 gpgkey=https://www.mongodb.org/static/pgp/server-8.0.asc
 EOF
-  
-sudo yum install -y mongodb-mongosh
 
-cat <<EOF >>/etc/teleport.yaml
+        sudo yum install -y mongodb-mongosh
+
+        cat <<EOF >>/etc/teleport.yaml
   - name: "${ENVIRONMENT_TAG}-${MONGO_DB_TELEPORT_DISPLAY_NAME}"
     protocol: "mongodb"
     uri: "${MONGO_DB_URI}"
@@ -146,7 +162,26 @@ cat <<EOF >>/etc/teleport.yaml
         - 27017
         - mongodb
 EOF
+    fi
+}
+
+install_dependencies
+setup_info_labels
+setup_nginx
+update_aws_cli
+configure_aws_instance
+set_hostname
+install_teleport
+configure_teleport_yaml
+
+if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}" && -n "${DATABASE_SECRET_ID}" ]]; then
+    configure_postgresql_service
+    setup_postgresql_db
+    configure_postgresql_service_block
 fi
+
+configure_admin_user
+setup_mongodb_service
 
 systemctl enable teleport
 systemctl start teleport
