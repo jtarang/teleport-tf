@@ -66,7 +66,7 @@ eks_node_max_capacity     = 1          # Maximum number of worker nodes
 # Database Instance Configuration
 # ==============================
 rds_db_instance_identifier = "jasmit-psql-rds" # Identifier for RDS instance
-rds_db_username            = "local-db-admin"          # Database username
+rds_db_username            = "localDbAdmin"          # Database username
 # db_password is now managed in Secrets Manager
 rds_db_name                    = "transactionsDb"     # Name of the database
 rds_db_port                    = 5432                 # Port for database access
@@ -87,7 +87,7 @@ rds_db_teleport_admin_user     = "teleport-db-admin"  # Teleport admin user to m
 # Aurora Cluster Instance Configuration
 # ==============================
 aurora_cluster_identifier     = "jasmit-aurora-cluster"
-aurora_db_username            = "local-db-admin"
+aurora_db_username            = "localDbAdmin"
 aurora_db_name                = "transactionsDb"
 aurora_db_instance_class      = "db.t4g.medium" # Smallest compute for Aurora
 aurora_db_publicly_accessible = true

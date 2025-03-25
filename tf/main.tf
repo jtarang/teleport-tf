@@ -35,33 +35,33 @@ module "iam" {
   iam_role_and_policy_prefix = var.iam_role_and_policy_prefix
 }
 
-# module "windows_launch_template" {
-#   source                    = "./modules/aws/launch_template"
-#   launch_template_prefix    = "${var.user_prefix}-windows"
-#   image_id                  = var.windows_ec2_image_id
-#   instance_type             = var.windows_ec2_instance_type
-#   nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
-#   ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
-#   ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
-#   ec2_ami_ssm_parameter     = var.windows_ec2_ami_ssm_parameter
-#   tags                      = var.tags
-#   teleport_edition          = var.teleport_edition
-#   teleport_address          = var.teleport_address
-#   teleport_node_join_token  = module.teleport.teleport_join_token
-#   iam_instance_role_name = module.iam.rds_connect_discovery_role.name
-# }
+module "windows_launch_template" {
+  source                    = "./modules/aws/launch_template"
+  launch_template_prefix    = "${var.user_prefix}-windows"
+  image_id                  = var.windows_ec2_image_id
+  instance_type             = var.windows_ec2_instance_type
+  nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
+  ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
+  ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
+  ec2_ami_ssm_parameter     = var.windows_ec2_ami_ssm_parameter
+  tags                      = var.tags
+  teleport_edition          = var.teleport_edition
+  teleport_address          = var.teleport_address
+  teleport_node_join_token  = module.teleport.teleport_join_token
+  iam_instance_role_name = module.iam.rds_connect_discovery_role.name
+}
 
-# module "windows_asg" {
-#   source                   = "./modules/aws/asg"
-#   ec2_asg_desired_capacity = var.windows_ec2_asg_desired_capacity
-#   ec2_asg_max_size         = var.windows_ec2_asg_max_size
-#   ec2_asg_min_size         = var.windows_ec2_asg_min_size
-#   vpc_id                   = module.vpc.vpc_id
-#   public_subnet_ids        = module.vpc.public_subnet_ids
-#   launch_template_id       = module.windows_launch_template.launch_template_id
-#   tags                     = var.tags
-#   user_prefix              = "${var.user_prefix}-windows"
-# }
+module "windows_asg" {
+  source                   = "./modules/aws/asg"
+  ec2_asg_desired_capacity = var.windows_ec2_asg_desired_capacity
+  ec2_asg_max_size         = var.windows_ec2_asg_max_size
+  ec2_asg_min_size         = var.windows_ec2_asg_min_size
+  vpc_id                   = module.vpc.vpc_id
+  public_subnet_ids        = [module.vpc.public_subnet_ids[0]]
+  launch_template_id       = module.windows_launch_template.launch_template_id
+  tags                     = var.tags
+  user_prefix              = "${var.user_prefix}-windows"
+}
 
 locals {
   development_tag = "dev"
@@ -101,7 +101,7 @@ module "dev_linux_asg" {
   ec2_asg_max_size         = var.linux_ec2_asg_max_size
   ec2_asg_min_size         = var.linux_ec2_asg_min_size
   vpc_id                   = module.vpc.vpc_id
-  public_subnet_ids        = module.vpc.public_subnet_ids
+  public_subnet_ids        = [module.vpc.public_subnet_ids[0]]
   launch_template_id       = module.dev_linux_launch_template.launch_template_id
   tags                     = var.tags
   user_prefix              = "${local.development_tag}-${var.user_prefix}-linux"
@@ -139,7 +139,7 @@ module "stg_linux_asg" {
   ec2_asg_max_size         = var.linux_ec2_asg_max_size
   ec2_asg_min_size         = var.linux_ec2_asg_min_size
   vpc_id                   = module.vpc.vpc_id
-  public_subnet_ids        = module.vpc.public_subnet_ids
+  public_subnet_ids        = [module.vpc.public_subnet_ids[0]]
   launch_template_id       = module.stg_linux_launch_template.launch_template_id
   tags                     = var.tags
   user_prefix              = "${local.staging_tag}-${var.user_prefix}-linux"
@@ -177,7 +177,7 @@ module "prd_linux_asg" {
   ec2_asg_max_size         = var.linux_ec2_asg_max_size
   ec2_asg_min_size         = var.linux_ec2_asg_min_size
   vpc_id                   = module.vpc.vpc_id
-  public_subnet_ids        = module.vpc.public_subnet_ids
+  public_subnet_ids        = [module.vpc.public_subnet_ids[0]]
   launch_template_id       = module.prd_linux_launch_template.launch_template_id
   tags                     = var.tags
   user_prefix              = "${local.production_tag}-${var.user_prefix}-linux"
