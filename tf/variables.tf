@@ -3,6 +3,12 @@ variable "aws_region" {
   type        = string
 }
 
+variable "aws_profile_name" {
+  description = "AWS Profile to use for authentication"
+  type = string
+  default = ""
+}
+
 variable "vpc_cidr_block" {
   description = "CIDR block for the VPC"
   type        = string

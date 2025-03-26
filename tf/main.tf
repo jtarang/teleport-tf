@@ -184,22 +184,22 @@ module "prd_linux_asg" {
 }
 
 
-# module "ad_windows_ec2" {
-#   source = "./modules/aws/ec2"
-#   image_id                  = var.windows_ec2_image_id
-#   instance_type             = var.windows_ec2_instance_type
-#   nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
-#   ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
-#   ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
-#   tags                      = var.tags
-#   teleport_edition          = var.teleport_edition
-#   teleport_address          = var.teleport_address
-#   teleport_node_join_token  = module.teleport.teleport_join_token
-#   iam_instance_role_name = module.iam.rds_connect_discovery_role.name
-#   launch_template_id = module.windows_launch_template.launch_template_id
-#   public_subnet_ids = module.vpc.public_subnet_ids
-#   user_prefix              = "${var.user_prefix}-ad-windows"
-# }
+module "ad_windows_ec2" {
+  source = "./modules/aws/ec2"
+  image_id                  = var.windows_ec2_image_id
+  instance_type             = var.windows_ec2_instance_type
+  nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
+  ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
+  ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
+  tags                      = var.tags
+  teleport_edition          = var.teleport_edition
+  teleport_address          = var.teleport_address
+  teleport_node_join_token  = module.teleport.teleport_join_token
+  iam_instance_role_name = module.iam.rds_connect_discovery_role.name
+  launch_template_id = module.windows_launch_template.launch_template_id
+  public_subnet_ids = [module.vpc.public_subnet_ids[0]]
+  user_prefix              = "${var.user_prefix}-ad-windows"
+}
 
 module "rds" {
   source                 = "./modules/aws/rds"
@@ -226,15 +226,15 @@ module "rds" {
   rds_db_subnet_ids                = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids])
 }
 
-# module "eks" {
-#   source                 = "./modules/aws/eks"
-#   eks_cluster_name       = "${var.user_prefix}-eks"
-#   eks_cluster_version    = var.eks_cluster_version
-#   eks_subnet_ids         = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids]) # Flattening the list of subnet IDs
-#   eks_security_group_ids = [module.nsg.nsg_id]
-#   eks_node_instance_type = var.eks_node_instance_type
-#   eks_node_count         = var.eks_node_desired_capacity
-#   eks_node_min_size      = var.eks_node_min_capacity
-#   eks_node_max_size      = var.eks_node_max_capacity
-#   tags                   = var.tags
-# }
+module "eks" {
+  source                 = "./modules/aws/eks"
+  eks_cluster_name       = "${var.user_prefix}-eks"
+  eks_cluster_version    = var.eks_cluster_version
+  eks_subnet_ids         = flatten([module.vpc.public_subnet_ids, module.vpc.private_subnet_ids]) # Flattening the list of subnet IDs
+  eks_security_group_ids = [module.nsg.nsg_id]
+  eks_node_instance_type = var.eks_node_instance_type
+  eks_node_count         = var.eks_node_desired_capacity
+  eks_node_min_size      = var.eks_node_min_capacity
+  eks_node_max_size      = var.eks_node_max_capacity
+  tags                   = var.tags
+}

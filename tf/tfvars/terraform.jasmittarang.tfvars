@@ -2,7 +2,8 @@
 # General Configuration
 # ==============================
 aws_region  = "us-east-1"      # AWS region for resources
-user_prefix = "jasmit-ssh" # Prefix for user-specific resources
+user_prefix = "jasmit" # Prefix for user-specific resources
+aws_profule = "devops-service-production"
 
 # Tagging for resources
 tags = {
@@ -58,9 +59,9 @@ teleport_edition = "enterprise" # Teleport edition to be used
 # ==============================
 eks_cluster_version       = "1.32"     # Kubernetes version for EKS cluster
 eks_node_instance_type    = "t2.micro" # EC2 instance type for EKS worker nodes
-eks_node_desired_capacity = 1          # Desired number of worker nodes
+eks_node_desired_capacity = 2          # Desired number of worker nodes
 eks_node_min_capacity     = 1          # Minimum number of worker nodes
-eks_node_max_capacity     = 1          # Maximum number of worker nodes
+eks_node_max_capacity     = 2          # Maximum number of worker nodes
 
 # ==============================
 # Database Instance Configuration
