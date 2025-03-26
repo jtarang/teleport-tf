@@ -3,7 +3,7 @@
 # ==============================
 aws_region  = "us-east-1"      # AWS region for resources
 user_prefix = "jasmit" # Prefix for user-specific resources
-aws_profule = "devops-service-production"
+aws_profile_name = "devops-service-production"
 
 # Tagging for resources
 tags = {
