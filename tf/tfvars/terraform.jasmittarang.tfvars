@@ -27,8 +27,8 @@ linux_ec2_asg_desired_capacity  = 1                                             
 linux_ec2_asg_min_size          = 1                                                               # Minimum size of EC2 Auto Scaling Group
 linux_ec2_asg_max_size          = 1                                                               # Maximum size of EC2 Auto Scaling Group
 linux_ec2_bootstrap_script_path = "../scripts/remote/install-teleport.sh"                         # Path to EC2 bootstrap script
-linux_ec2_ami_ssm_parameter     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2" # SSM parameter for AMI ID
-linux_ec2_instance_type         = "t2.micro"                                                      # EC2 instance type
+linux_ec2_ami_ssm_parameter     = "/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id" # SSM parameter for AMI ID
+linux_ec2_instance_type         = "t3.small"                                                      # EC2 instance type
 linux_ec2_image_id              = ""                                                              # Leave empty for dynamic selection via AWS API
 
 # Windows
@@ -117,5 +117,13 @@ iam_role_and_policy_prefix = "jasmit-nebula-dash"
 # ==============================
 # MongoDB Configuration
 # ==============================
-mongodb_uri_ssm_parameter_key = "/teleport/jasmit/prd/resource/db/mongo/host"
+mongodb_uri_parameter_store_key = "/teleport/jasmit/prd/resource/db/mongo/host"
 mongodb_teleport_display_name = "mongodb-atlas"
+
+# ==============================
+# Windows AD Configuration
+# ==============================
+windows_ad_admin_username_parameter_store_key = "/teleport/jasmit/prd/windows-ad-admin/username"
+windows_ad_admin_password_parameter_store_key = "/teleport/jasmit/prd/windows-ad-admin/password"
+windows_ad_domain_name_parameter_store_key = "/teleport/jasmit/prd/windows-ad/domain-name"
+windows_ad_bootstrap_script_path = "../scripts/remote/install-and-configure-ad.ps1"

@@ -1,4 +1,5 @@
 
+<powershell>
 $Global:TeleportCluster = "${TELEPORT_ADDRESS}"
 $Global:TeleportEdition = "${TELEPORT_EDITION}"
 $Global:CertFile = "teleport.cer"
@@ -45,6 +46,7 @@ function Install-TeleportAuth {
     Write-Host "Installing Teleport Windows Auth..."
     Start-Process -FilePath ".\$Global:SetupExe" -ArgumentList "install --cert=$Global:CertFile -r" -Wait -NoNewWindow
     Write-Host "Installation complete. A system restart is required."
+    Restart-Computer -Force
 }
 
 # Execute Functions
@@ -52,3 +54,4 @@ Get-LatestTeleportVersion
 Get-TeleportCertificate
 Get-TeleportSetup
 Install-TeleportAuth
+</powershell>

@@ -64,6 +64,9 @@ resource "aws_launch_template" "lt" {
     MONGO_DB_URI = var.mongodb_uri
     MONGO_DB_TELEPORT_DISPLAY_NAME = var.mongodb_teleport_display_name
     TELEPORT_DISPLAY_NAME_STRIP_STRING = var.teleport_display_name_strip_string
+    WINDOWS_AD_DOMAIN_NAME = var.windows_ad_domain_name
+    WINDOWS_AD_ADMIN_USERNAME = var.windows_ad_admin_username
+    WINDOWS_AD_ADMIN_PASSWORD = var.windows_ad_admin_password
     ENVIRONMENT_TAG = var.environment_tag
   }))
 }

@@ -309,7 +309,7 @@ variable "iam_role_and_policy_prefix" {
   type        = string
 }
 
-variable "mongodb_uri_ssm_parameter_key" {
+variable "mongodb_uri_parameter_store_key" {
   description = "MongoDB connection URI SSM Parameter Key"
   type        = string
   default     = ""
@@ -324,4 +324,20 @@ variable "mongodb_teleport_display_name" {
 variable "teleport_display_name_strip_string" {
   description = "Strip any value to node and db names for Teleport Display Names"
   default = " "
+}
+
+variable "windows_ad_admin_username_parameter_store_key" {
+  description = "Parameter Store Key for Windows AD Credentials"
+}
+
+variable "windows_ad_admin_password_parameter_store_key" {
+  description = "Parameter Store Key for Windows AD Credentials"
+}
+
+variable "windows_ad_domain_name_parameter_store_key" {
+  description = "Parameter Store Key for Windows AD Domain Name"
+}
+
+variable "windows_ad_bootstrap_script_path" {
+  description = "Local Relative Path to the AD install and configure script"
 }

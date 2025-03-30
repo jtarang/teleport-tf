@@ -11,8 +11,8 @@ DATABASE_PORT=$(echo "${DATABASE_URI}" | cut -d':' -f2)
 TELEPORT_DATABASE_DISPLAY_NAME=$(echo "${DATABASE_URI}" | cut -d'.' -f1 | sed 's/'"${TELEPORT_DISPLAY_NAME_STRIP_STRING}"'//g')
 
 install_dependencies() {
-    sudo yum -y update
-    sudo yum -y install git nmap jq
+    sudo apt update -y
+    sudo apt install -y git nmap jq unzip curl
 }
 
 setup_info_labels() {
@@ -22,14 +22,14 @@ setup_info_labels() {
 }
 
 setup_nginx() {
-    sudo amazon-linux-extras install nginx1.12
+    sudo apt install -y nginx
     sudo systemctl start nginx
     sudo systemctl enable nginx
     sudo systemctl status nginx
 }
 
 update_aws_cli() {
-    sudo yum -y remove awscli
+    sudo apt remove -y awscli
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
     unzip awscliv2.zip
     sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
@@ -87,18 +87,16 @@ EOF
 }
 
 configure_postgresql_service() {
-    sudo amazon-linux-extras enable postgresql14
-    sudo yum install -y postgresql
+    sudo apt install -y postgresql-client
 }
 
 setup_postgresql_db() {
-    # Fetch the secret JSON using AWS CLI
-    DATABASE_SECRET_JSON=$(/usr/local/bin/aws secretsmanager get-secret-value --secret-id "${DATABASE_SECRET_ID}" --region "$REGION" --query SecretString --output text)
+    DATABASE_SECRET_JSON=$(/usr/local/bin/aws secretsmanager get-secret-value --secret-id '${DATABASE_SECRET_ID}' --region "$REGION" --query SecretString --output text)
     export PGUSER=$(echo "$DATABASE_SECRET_JSON" | jq -r '.username')
     export PGPASSWORD=$(echo "$DATABASE_SECRET_JSON" | jq -r '.password')
     export PGSSLMODE="require"
 
-    psql --host="$DATABASE_HOST" --port="$DATABASE_PORT" --username="$PGUSER" --dbname="${DATABASE_NAME}" <<SQL
+    sudo -u psql --host="$DATABASE_HOST" --port="$DATABASE_PORT" --username="$PGUSER" --dbname="${DATABASE_NAME}" <<SQL
     GRANT rds_iam TO $PGUSER;
     CREATE USER "${DATABASE_TELEPORT_ADMIN_USER}" LOGIN CREATEROLE;
     GRANT rds_iam TO "${DATABASE_TELEPORT_ADMIN_USER}" WITH ADMIN OPTION;
@@ -137,16 +135,10 @@ EOF
 
 setup_mongodb_service() {
     if [[ -n "${MONGO_DB_TELEPORT_DISPLAY_NAME}" && -n "${MONGO_DB_URI}" ]]; then
-        cat <<EOF >> /etc/yum.repos.d/mongodb-org-8.0.repo
-[mongodb-org-8.0]
-name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/8.0/\$basearch/
-gpgcheck=1
-enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-8.0.asc
-EOF
-
-        sudo yum install -y mongodb-mongosh
+        wget -qO - https://www.mongodb.org/static/pgp/server-8.0.asc | sudo apt-key add -
+        echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+        sudo apt update -y
+        sudo apt install -y mongodb-mongosh
 
         cat <<EOF >>/etc/teleport.yaml
   - name: "${ENVIRONMENT_TAG}-${MONGO_DB_TELEPORT_DISPLAY_NAME}"
@@ -183,7 +175,7 @@ fi
 configure_admin_user
 setup_mongodb_service
 
-systemctl enable teleport
-systemctl start teleport
-systemctl status teleport
+sudo systemctl enable teleport
+sudo systemctl start teleport
+sudo systemctl status teleport
 rm -rf /tmp/info_labels
