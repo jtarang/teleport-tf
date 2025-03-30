@@ -96,7 +96,7 @@ setup_postgresql_db() {
     export PGPASSWORD=$(echo "$DATABASE_SECRET_JSON" | jq -r '.password')
     export PGSSLMODE="require"
 
-    sudo -u psql --host="$DATABASE_HOST" --port="$DATABASE_PORT" --username="$PGUSER" --dbname="${DATABASE_NAME}" <<SQL
+    psql --host="$DATABASE_HOST" --port="$DATABASE_PORT" --username="$PGUSER" --dbname="${DATABASE_NAME}" <<SQL
     GRANT rds_iam TO $PGUSER;
     CREATE USER "${DATABASE_TELEPORT_ADMIN_USER}" LOGIN CREATEROLE;
     GRANT rds_iam TO "${DATABASE_TELEPORT_ADMIN_USER}" WITH ADMIN OPTION;
