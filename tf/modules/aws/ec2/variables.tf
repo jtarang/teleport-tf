@@ -112,3 +112,18 @@ variable "environment_tag" {
   description = "Environment Tag Value: dev, stg, prd"
   default = "dev" 
 }
+
+variable "windows_ad_domain_name" {
+  description = "Windows AD Domain Name"
+  default = ""
+}
+
+variable "windows_ad_admin_username" {
+  description = "Windows AD Admin Username"
+  default = ""
+}
+
+variable "windows_ad_admin_password" {
+  description = "Windows AD Admin Password"
+  default = ""
+}
