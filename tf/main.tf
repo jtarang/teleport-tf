@@ -53,34 +53,6 @@ module "iam" {
   iam_role_and_policy_prefix = var.iam_role_and_policy_prefix
 }
 
-module "windows_launch_template" {
-  source                    = "./modules/aws/launch_template"
-  launch_template_prefix    = "${var.user_prefix}-windows"
-  image_id                  = var.windows_ec2_image_id
-  instance_type             = var.windows_ec2_instance_type
-  nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
-  ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
-  ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
-  ec2_ami_ssm_parameter     = var.windows_ec2_ami_ssm_parameter
-  tags                      = var.tags
-  teleport_edition          = var.teleport_edition
-  teleport_address          = var.teleport_address
-  teleport_node_join_token  = module.teleport.teleport_join_token
-  iam_instance_role_name = module.iam.rds_connect_discovery_role.name
-}
-
-module "windows_asg" {
-  source                   = "./modules/aws/asg"
-  ec2_asg_desired_capacity = var.windows_ec2_asg_desired_capacity
-  ec2_asg_max_size         = var.windows_ec2_asg_max_size
-  ec2_asg_min_size         = var.windows_ec2_asg_min_size
-  vpc_id                   = module.vpc.vpc_id
-  public_subnet_ids        = [module.vpc.public_subnet_ids[0]]
-  launch_template_id       = module.windows_launch_template.launch_template_id
-  tags                     = var.tags
-  user_prefix              = "${var.user_prefix}-windows"
-}
-
 module "dev_linux_launch_template" {
   source                    = "./modules/aws/launch_template"
   launch_template_prefix    = "${local.development_tag}-${var.user_prefix}-linux"
@@ -119,43 +91,6 @@ module "dev_linux_asg" {
   user_prefix              = "${local.development_tag}-${var.user_prefix}-linux"
 }
 
-# module "stg_linux_launch_template" {
-#   source                    = "./modules/aws/launch_template"
-#   launch_template_prefix    = "${local.staging_tag}-${var.user_prefix}-linux"
-#   image_id                  = var.linux_ec2_image_id
-#   instance_type             = var.linux_ec2_instance_type
-#   nsg_ids                   = [module.nsg.nsg_id]
-#   ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
-#   ec2_bootstrap_script_path = var.linux_ec2_bootstrap_script_path
-#   ec2_ami_ssm_parameter     = var.linux_ec2_ami_ssm_parameter
-#   tags                      = var.tags
-#   teleport_edition          = var.teleport_edition
-#   teleport_address          = var.teleport_address
-#   teleport_node_join_token  = module.teleport.teleport_join_token
-#   iam_instance_role_name = module.iam.rds_connect_discovery_role.name
-#   database_name = module.rds.db_instance.db_name
-#   database_protocol = module.rds.db_instance.engine
-#   database_uri = module.rds.db_instance.endpoint
-#   database_teleport_admin_user = var.rds_db_teleport_admin_user
-#   database_secret_id = module.rds.db_secret_id
-#   depends_on = [ module.iam.rds_connect_discovery_role, module.rds.db_instance ]
-#   mongodb_teleport_display_name = var.mongodb_teleport_display_name
-#   mongodb_uri = data.aws_ssm_parameter.mongo_host.value
-#   teleport_display_name_strip_string = var.teleport_display_name_strip_string
-#   environment_tag = "${local.staging_tag}"
-# }
-
-# module "stg_linux_asg" {
-#   source                   = "./modules/aws/asg"
-#   ec2_asg_desired_capacity = var.linux_ec2_asg_desired_capacity
-#   ec2_asg_max_size         = var.linux_ec2_asg_max_size
-#   ec2_asg_min_size         = var.linux_ec2_asg_min_size
-#   vpc_id                   = module.vpc.vpc_id
-#   public_subnet_ids        = [module.vpc.public_subnet_ids[0]]
-#   launch_template_id       = module.stg_linux_launch_template.launch_template_id
-#   tags                     = var.tags
-#   user_prefix              = "${local.staging_tag}-${var.user_prefix}-linux"
-# }
 
 module "prd_linux_launch_template" {
   source                    = "./modules/aws/launch_template"
@@ -196,13 +131,29 @@ module "prd_linux_asg" {
 }
 
 
-module "ad_windows_ec2" {
+module "windows_launch_template" {
+  source                    = "./modules/aws/launch_template"
+  launch_template_prefix    = "${var.user_prefix}-windows"
+  image_id                  = var.windows_ec2_image_id
+  instance_type             = var.windows_ec2_instance_type
+  nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
+  ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
+  ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
+  ec2_ami_ssm_parameter     = var.windows_ec2_ami_ssm_parameter
+  tags                      = var.tags
+  teleport_edition          = var.teleport_edition
+  teleport_address          = var.teleport_address
+  teleport_node_join_token  = module.teleport.teleport_join_token
+  iam_instance_role_name = module.iam.rds_connect_discovery_role.name
+}
+
+module "ad_windows_domain_controller_ec2" {
   source = "./modules/aws/ec2"
   image_id                  = var.windows_ec2_image_id
   instance_type             = var.windows_ec2_instance_type
   nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
   ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
-  ec2_bootstrap_script_path = var.windows_ad_bootstrap_script_path
+  ec2_bootstrap_script_path = var.windows_ad_install_bootstrap_script_path
   tags                      = var.tags
   teleport_edition          = var.teleport_edition
   teleport_address          = var.teleport_address
@@ -213,7 +164,51 @@ module "ad_windows_ec2" {
   windows_ad_admin_username = data.aws_ssm_parameter.windows_ad_admin_username.value
   windows_ad_admin_password = data.aws_ssm_parameter.windows_ad_admin_password.value
   windows_ad_domain_name = data.aws_ssm_parameter.windows_ad_domain_name.value
-  user_prefix              = "${var.user_prefix}-ad-windows"
+  user_prefix              = "${var.user_prefix}-windows-ad-domain-controller"
+}
+
+module "ad_windows_node_ec2" {
+  source = "./modules/aws/ec2"
+  image_id                  = var.windows_ec2_image_id
+  instance_type             = var.windows_ec2_instance_type
+  nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
+  ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
+  ec2_bootstrap_script_path = var.windows_ad_domain_join_bootstrap_script_path
+  tags                      = var.tags
+  teleport_edition          = var.teleport_edition
+  teleport_address          = var.teleport_address
+  teleport_node_join_token  = module.teleport.teleport_join_token
+  iam_instance_role_name = module.iam.rds_connect_discovery_role.name
+  launch_template_id = module.windows_launch_template.launch_template_id
+  public_subnet_ids = [module.vpc.public_subnet_ids[0]]
+  windows_ad_admin_username = data.aws_ssm_parameter.windows_ad_admin_username.value
+  windows_ad_admin_password = data.aws_ssm_parameter.windows_ad_admin_password.value
+  windows_ad_domain_name = data.aws_ssm_parameter.windows_ad_domain_name.value
+  windows_ad_domain_controller_ip = module.ad_windows_domain_controller_ec2.private_ip
+  user_prefix              = "${var.user_prefix}-windows-ad-node"
+}
+
+
+# Create a DHCP options set
+resource "aws_vpc_dhcp_options" "ad_domain_controller_dns_resolver" {
+  domain_name         = data.aws_ssm_parameter.windows_ad_domain_name.value
+  domain_name_servers = [
+    cidrhost(module.vpc.cidr_block, 2), # AWS default DNS
+    module.ad_windows_domain_controller_ec2.private_ip
+  ] 
+  netbios_node_type = 2
+  ntp_servers                       = [module.ad_windows_domain_controller_ec2.private_ip]
+  netbios_name_servers              = [module.ad_windows_domain_controller_ec2.private_ip] 
+
+  tags = {
+    Name = "${var.user_prefix}-ad-domain-controller-dns-resolver"
+  }
+}
+
+# Associate the DHCP options set with the VPC
+resource "aws_vpc_dhcp_options_association" "dhcp_assoc" {
+  vpc_id          = module.vpc.vpc_id
+  dhcp_options_id = aws_vpc_dhcp_options.ad_domain_controller_dns_resolver.id
 }
 
 module "rds" {
