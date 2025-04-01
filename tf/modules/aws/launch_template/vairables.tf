@@ -123,3 +123,9 @@ variable "windows_ad_admin_password" {
   description = "Windows AD Admin Password"
   default = ""
 }
+
+variable "windows_ad_domain_controller_ip" {
+  description = "Windows AD Domain Controller IP"
+  default = ""
+  
+}

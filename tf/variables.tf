@@ -338,6 +338,10 @@ variable "windows_ad_domain_name_parameter_store_key" {
   description = "Parameter Store Key for Windows AD Domain Name"
 }
 
-variable "windows_ad_bootstrap_script_path" {
+variable "windows_ad_install_bootstrap_script_path" {
   description = "Local Relative Path to the AD install and configure script"
+}
+
+variable "windows_ad_domain_join_bootstrap_script_path" {
+  description = "Local Relative Path to the Domain Join script"
 }

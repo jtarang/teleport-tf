@@ -58,7 +58,7 @@ Write-Host "Post-reboot setup complete!"
 }
 
 $DOMAIN = "${WINDOWS_AD_DOMAIN_NAME}"
-$SafeModeAdministratorPassword = ConvertTo-SecureString  "${WINDOWS_AD_ADMIN_PASSWORD}"-AsPlainText -Force
+$SafeModeAdministratorPassword = ConvertTo-SecureString "${WINDOWS_AD_ADMIN_PASSWORD}" -AsPlainText -Force
 
 Install-ADFeatures
 Install-ADForest -Domain $DOMAIN -SafeModeAdministratorPassword $SafeModeAdministratorPassword
