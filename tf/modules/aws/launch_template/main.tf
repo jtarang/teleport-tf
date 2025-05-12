@@ -67,6 +67,7 @@ resource "aws_launch_template" "lt" {
     WINDOWS_AD_DOMAIN_NAME = var.windows_ad_domain_name
     WINDOWS_AD_ADMIN_USERNAME = var.windows_ad_admin_username
     WINDOWS_AD_ADMIN_PASSWORD = var.windows_ad_admin_password
+    WINDOWS_AD_DOMAIN_CONTROLLER_IP = var.windows_ad_domain_controller_ip
     ENVIRONMENT_TAG = var.environment_tag
   }))
 }

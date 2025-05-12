@@ -99,6 +99,11 @@ setup_postgresql_db() {
     export PGSSLMODE="require"
 
     psql --host="$DATABASE_HOST" --port="$DATABASE_PORT" --username="$PGUSER" --dbname="${DATABASE_NAME}" <<SQL
+    CREATE DATABASE teleport_int_db;
+    CREATE DATABASE teleport_qa_db;
+    CREATE DATABASE teleport_dev_db;
+    CREATE DATABASE teleport_stg_db;
+    CREATE DATABASE teleport_prd_db;
     GRANT rds_iam TO $PGUSER;
     CREATE USER "${DATABASE_TELEPORT_ADMIN_USER}" LOGIN CREATEROLE;
     GRANT rds_iam TO "${DATABASE_TELEPORT_ADMIN_USER}" WITH ADMIN OPTION;
@@ -180,7 +185,7 @@ if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}"
     configure_postgresql_service_block
 fi
 
-configure_admin_user
+#configure_admin_user
 setup_mongodb_service
 
 systemctl enable teleport
