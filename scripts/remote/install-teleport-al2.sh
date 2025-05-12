@@ -5,6 +5,7 @@ set +x
 SESSION_TOKEN=$(curl -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" -X PUT "http://169.254.169.254/latest/api/token")
 INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $SESSION_TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
 REGION=$(curl -H "X-aws-ec2-metadata-token: $SESSION_TOKEN" -s http://169.254.169.254/latest/meta-data/placement/region)
+PRIVATE_IP=$(curl -H "X-aws-ec2-metadata-token: $SESSION_TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
 
 DATABASE_HOST=$(echo "${DATABASE_URI}" | cut -d':' -f1)
 DATABASE_PORT=$(echo "${DATABASE_URI}" | cut -d':' -f2)
@@ -38,6 +39,7 @@ update_aws_cli() {
 configure_aws_instance() {
     /usr/local/bin/aws ec2 delete-tags --resources $INSTANCE_ID --tags Key="teleport.dev/creator"
     /usr/local/bin/aws ec2 create-tags --resources $INSTANCE_ID --tags Key=InstanceID,Value=$INSTANCE_ID
+    /usr/local/bin/aws ec2 create-tags  --resources "$INSTANCE_ID" --tags Key=HealthzEndpoint,Value="$PRIVATE_IP:3999" --region $REGION
     /usr/local/bin/aws ec2 modify-instance-metadata-options --instance-id $INSTANCE_ID --http-endpoint enabled --instance-metadata-tags enabled --region $REGION
 }
 
@@ -58,6 +60,7 @@ teleport:
   auth_token: /tmp/token
   proxy_server: ${TELEPORT_ADDRESS}
   data_dir: /var/lib/teleport
+  diag_addr: "127.0.0.1:3999"
   log:
     output: stderr
     severity: INFO
