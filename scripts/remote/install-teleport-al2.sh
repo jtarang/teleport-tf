@@ -11,6 +11,8 @@ DATABASE_HOST=$(echo "${DATABASE_URI}" | cut -d':' -f1)
 DATABASE_PORT=$(echo "${DATABASE_URI}" | cut -d':' -f2)
 TELEPORT_DATABASE_DISPLAY_NAME=$(echo "${DATABASE_URI}" | cut -d'.' -f1 | sed 's/'"${TELEPORT_DISPLAY_NAME_STRIP_STRING}"'//g')
 
+TELEPORT_DIAG_PORT="3999"
+
 install_dependencies() {
     sudo yum -y update
     sudo yum -y install git nmap jq
@@ -60,7 +62,7 @@ teleport:
   auth_token: /tmp/token
   proxy_server: ${TELEPORT_ADDRESS}
   data_dir: /var/lib/teleport
-  diag_addr: "127.0.0.1:3999"
+  diag_addr: "127.0.0.1:$TELEPORT_DIAG_PORT"
   log:
     output: stderr
     severity: INFO
