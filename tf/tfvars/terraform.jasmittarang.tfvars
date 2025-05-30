@@ -128,5 +128,3 @@ windows_ad_admin_password_parameter_store_key = "/teleport/jasmit/prd/windows-ad
 windows_ad_domain_name_parameter_store_key = "/teleport/jasmit/prd/windows-ad/domain-name"
 windows_ad_install_bootstrap_script_path = "../scripts/remote/install-and-configure-ad.ps1"
 windows_ad_domain_join_bootstrap_script_path = "../scripts/remote/domain-join-windows-server.ps1"
-windows_ad_install_bootstrap_script_path = "../scripts/remote/install-and-configure-ad.ps1"
-windows_ad_domain_join_bootstrap_script_path = "../scripts/remote/domain-join-windows-server.ps1"
