@@ -12,8 +12,18 @@ TELEPORT_DATABASE_DISPLAY_NAME=$(echo "${DATABASE_URI}" | cut -d'.' -f1 | sed 's
 
 install_dependencies() {
     sudo yum -y update
-    sudo yum -y install git nmap jq
+
+    sudo amazon-linux-extras enable docker
+    sudo yum -y install git nmap jq docker
+
+    sudo systemctl start docker
+    sudo systemctl enable docker
+
+    sudo mkdir -p /usr/local/lib/docker/cli-plugins
+    curl -sSL "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
+    sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 }
+
 
 setup_info_labels() {
     git clone https://github.com/jtarang/teleportinfolabels.git /tmp/info_labels
@@ -83,6 +93,19 @@ app_service:
     uri: tcp://localhost:80
     labels:
       env: ${ENVIRONMENT_TAG}
+  - name: "grafana-${ENVIRONMENT_TAG}"
+    uri: http://localhost:3000
+    public_addr: grafana-${ENVIRONMENT_TAG}.nebula-dash.teleport.sh
+    rewrite:
+        headers:
+        - "Host: grafana-${ENVIRONMENT_TAG}.nebula-dash.teleport.sh"
+        - "Origin: https://grafana.nebula-dash.teleport.sh"
+    labels:
+      env: ${ENVIRONMENT_TAG}
+tracing_service:
+  enabled: true
+  exporter_url: grpc://127.0.0.1:4317
+  sampling_rate_per_million: 1000000
 EOF
 }
 
@@ -132,7 +155,7 @@ EOF
 }
 
 configure_admin_user() {
-    if [[ -n "${DATABASE_TELEPORT_ADMIN_USER}" ]]; then
+    if [[ -n "${DATABASE_TELEPORT_ADMIN_USER}" && "${ENVIRONMENT_TAG}" == "prd" ]]; then
         cat<<EOF >>/etc/teleport.yaml
     admin_user:
       "name": "${DATABASE_TELEPORT_ADMIN_USER}"
@@ -170,6 +193,37 @@ EOF
     fi
 }
 
+setup_grafana_service() {
+    mkdir -p ~/grafana/
+    sudo tee ~/grafana/docker-compose.yaml > /dev/null << EOF
+services:
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    restart: always
+    environment:
+      - GF_SERVER_HTTP_PORT=3000
+      - GF_SERVER_PROTOCOL=http
+      - GF_SERVER_ENABLE_GZIP=true
+      - GF_SERVER_ROOT_URL=https://grafana-${ENVIRONMENT_TAG}.nebula-dash.teleport.sh
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      #- GF_SECURITY_ADMIN_USER=jasmit.tarang@goteleport.sh
+      - GF_USERS_DEFAULT_THEME=dark
+      - GF_AUTH_BASIC_ENABLED=false
+      - GF_AUTH_JWT_ENABLED=true
+      - GF_AUTH_JWT_HEADER_NAME=Teleport-Jwt-Assertion
+      - GF_AUTH_JWT_EMAIL_CLAIM=sub
+      - GF_AUTH_JWT_USERNAME_CLAIM=sub
+      - GF_AUTH_JWT_JWK_SET_URL=https://nebula-dash.teleport.sh:443/.well-known/jwks.json
+      - GF_AUTH_JWT_AUTO_SIGN_UP=true
+      - GF_AUTH_JWT_USERNAME_ATTRIBUTE_PATH=username
+      - GF_AUTH_JWT_ROLE_ATTRIBUTE_PATH=contains(roles[*], 'access') && 'Admin' || contains(roles[*], 'editor') && 'Editor' || 'Viewer'
+      - GF_AUTH_JWT_ALLOW_ASSIGN_GRAFANA_ADMIN=true
+EOF
+    docker compose -f ~/grafana/docker-compose.yaml -p grafana up -d
+}
+
 install_dependencies
 setup_info_labels
 setup_nginx
@@ -185,8 +239,9 @@ if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}"
     configure_postgresql_service_block
 fi
 
-#configure_admin_user
+configure_admin_user
 setup_mongodb_service
+setup_grafana_service
 
 systemctl enable teleport
 systemctl start teleport

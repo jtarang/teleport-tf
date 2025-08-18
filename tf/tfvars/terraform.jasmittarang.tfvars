@@ -26,9 +26,9 @@ availability_zones   = ["us-east-1a", "us-east-1b"]   # Availability zones for r
 linux_ec2_asg_desired_capacity  = 1                                                               # Desired capacity of EC2 Auto Scaling Group
 linux_ec2_asg_min_size          = 1                                                               # Minimum size of EC2 Auto Scaling Group
 linux_ec2_asg_max_size          = 1                                                               # Maximum size of EC2 Auto Scaling Group
-linux_ec2_bootstrap_script_path = "../scripts/remote/install-teleport-al2.sh"                         # Path to EC2 bootstrap script
-linux_ec2_ami_ssm_parameter     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2" # SSM parameter for AMI ID
-#linux_ec2_ami_ssm_parameter     = "/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id" # SSM parameter for AMI ID
+linux_ec2_bootstrap_script_path = "../scripts/remote/install-teleport-debian.sh"                         # Path to EC2 bootstrap script
+#linux_ec2_ami_ssm_parameter     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2" # SSM parameter for AMI ID
+linux_ec2_ami_ssm_parameter     = "/aws/service/debian/release/bookworm/latest/amd64" # SSM parameter for AMI ID
 linux_ec2_instance_type         = "t3.small"                                                      # EC2 instance type
 linux_ec2_image_id              = ""                                                              # Leave empty for dynamic selection via AWS API
 
