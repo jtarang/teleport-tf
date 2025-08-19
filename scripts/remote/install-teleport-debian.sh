@@ -93,6 +93,7 @@ auth_service:
   enabled: false
 app_service:
   enabled: "yes"
+  mcp_demo_server: true
   apps:
   - name: "${ENVIRONMENT_TAG}-nginx-app"
     uri: tcp://localhost:80
