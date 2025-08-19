@@ -246,7 +246,7 @@ if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}"
     configure_postgresql_service_block
 fi
 
-configure_admin_user
+#configure_admin_user
 setup_mongodb_service
 setup_grafana_service
 
