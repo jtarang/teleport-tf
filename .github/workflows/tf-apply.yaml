@@ -102,18 +102,21 @@ jobs:
       - name: Terraform Init
         id: init
         run: |
+          eval "$(tctl terraform env)"   
           cd ${{ env.TF_PATH }} && terraform init
 
       - name: Terraform Plan
         id: plan
         run: |
-          export TF_VAR_teleport_address="${{ secrets.TELEPORT_CLUSTER_DOMAIN }}"
+          export TF_VAR_teleport_address="$TF_TELEPORT_ADDR"      
+          export TF_VAR_teleport_identity_file_base64="$TF_TELEPORT_IDENTITY_FILE_BASE64"
           cd ${{ env.TF_PATH }} && terraform plan --var-file=tfvars/ci-cd.prd.tfvars -out="${{ env.TF_PLAN_PATH }}"
 
       - name: Terraform Apply
         id: apply
         run: |
-          export TF_VAR_teleport_address="${{ secrets.TELEPORT_CLUSTER_DOMAIN }}"
+          export TF_VAR_teleport_address="$TF_TELEPORT_ADDR"      
+          export TF_VAR_teleport_identity_file_base64="$TF_TELEPORT_IDENTITY_FILE_BASE64"
           cd ${{ env.TF_PATH }} && terraform apply -auto-approve "${{ env.TF_PLAN_PATH }}"
 
       - name: Clean up
