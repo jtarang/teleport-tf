@@ -130,21 +130,43 @@ module "prd_linux_asg" {
   user_prefix              = "${local.production_tag}-${var.user_prefix}-linux"
 }
 
-
-module "windows_launch_template" {
+module "windows_ad_domain_controller_launch_template" {
   source                    = "./modules/aws/launch_template"
-  launch_template_prefix    = "${var.user_prefix}-windows"
+  launch_template_prefix    = "${var.user_prefix}-windows-domain-controller"
   image_id                  = var.windows_ec2_image_id
   instance_type             = var.windows_ec2_instance_type
   nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
   ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
-  ec2_bootstrap_script_path = var.windows_ec2_bootstrap_script_path
+  ec2_bootstrap_script_path = var.windows_ad_install_bootstrap_script_path
   ec2_ami_ssm_parameter     = var.windows_ec2_ami_ssm_parameter
   tags                      = var.tags
   teleport_edition          = var.teleport_edition
   teleport_address          = var.teleport_address
   teleport_node_join_token  = module.teleport.teleport_join_token
   iam_instance_role_name = module.iam.rds_connect_discovery_role.name
+  windows_ad_domain_name = data.aws_ssm_parameter.windows_ad_domain_name.value
+  windows_ad_admin_username = data.aws_ssm_parameter.windows_ad_admin_username.value
+  windows_ad_admin_password = data.aws_ssm_parameter.windows_ad_admin_password.value
+}
+
+module "windows_ad_node_launch_template" {
+  source                    = "./modules/aws/launch_template"
+  launch_template_prefix    = "${var.user_prefix}-windows-node"
+  image_id                  = var.windows_ec2_image_id
+  instance_type             = var.windows_ec2_instance_type
+  nsg_ids                   = [module.nsg.nsg_id, module.nsg.ad_domain_controller_nsg_id]
+  ssh_key_name              = "${var.ssh_key_name}-${var.aws_region}"
+  ec2_bootstrap_script_path = var.windows_ad_domain_join_bootstrap_script_path
+  ec2_ami_ssm_parameter     = var.windows_ec2_ami_ssm_parameter
+  tags                      = var.tags
+  teleport_edition          = var.teleport_edition
+  teleport_address          = var.teleport_address
+  teleport_node_join_token  = module.teleport.teleport_join_token
+  iam_instance_role_name = module.iam.rds_connect_discovery_role.name
+  windows_ad_domain_name = data.aws_ssm_parameter.windows_ad_domain_name.value
+  windows_ad_admin_username = data.aws_ssm_parameter.windows_ad_admin_username.value
+  windows_ad_admin_password = data.aws_ssm_parameter.windows_ad_admin_password.value
+  windows_ad_domain_controller_ip = module.ad_windows_domain_controller_ec2.private_ip
 }
 
 module "ad_windows_domain_controller_ec2" {
@@ -159,7 +181,7 @@ module "ad_windows_domain_controller_ec2" {
   teleport_address          = var.teleport_address
   teleport_node_join_token  = module.teleport.teleport_join_token
   iam_instance_role_name = module.iam.rds_connect_discovery_role.name
-  launch_template_id = module.windows_launch_template.launch_template_id
+  launch_template_id = module.windows_ad_domain_controller_launch_template.launch_template_id
   public_subnet_ids = [module.vpc.public_subnet_ids[0]]
   windows_ad_admin_username = data.aws_ssm_parameter.windows_ad_admin_username.value
   windows_ad_admin_password = data.aws_ssm_parameter.windows_ad_admin_password.value
@@ -179,7 +201,7 @@ module "ad_windows_node_ec2" {
   teleport_address          = var.teleport_address
   teleport_node_join_token  = module.teleport.teleport_join_token
   iam_instance_role_name = module.iam.rds_connect_discovery_role.name
-  launch_template_id = module.windows_launch_template.launch_template_id
+  launch_template_id = module.windows_ad_node_launch_template.launch_template_id
   public_subnet_ids = [module.vpc.public_subnet_ids[0]]
   windows_ad_admin_username = data.aws_ssm_parameter.windows_ad_admin_username.value
   windows_ad_admin_password = data.aws_ssm_parameter.windows_ad_admin_password.value

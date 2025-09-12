@@ -66,7 +66,7 @@ function Domain-Join-Node {
 
 # Execute Functions
 Set-DnsClientServerAddress -InterfaceAlias (Get-NetAdapter).Name -ServerAddresses ("${WINDOWS_AD_DOMAIN_CONTROLLER_IP}") 
-Start-Sleep -Seconds 900  # 900 seconds = 15 minutes
+Start-Sleep -Seconds 1800  # 1800 seconds = 30 minutes
 Domain-Join-Node
 Get-LatestTeleportVersion
 Get-TeleportCertificate
