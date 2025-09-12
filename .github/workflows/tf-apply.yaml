@@ -1,0 +1,120 @@
+name: Terraform Pipeline
+
+on:
+  push: {}
+  workflow_dispatch: {}
+  pull_request:
+
+jobs:
+
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs: build
+    #if: github.ref == 'refs/heads/main' # Deploy only on the main branch
+    permissions:
+      id-token: write
+      actions: read
+      contents: read  # Access to the repository contents (e.g., checkouts, fetching)
+      pull-requests: write  # If the CD pipeline interacts with PRs
+
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Variables
+        id: version
+        run: |
+          echo "TF_PATH=$GITHUB_WORKSPACE/tf/" >> $GITHUB_ENV
+          echo "TF_PLAN_PATH=$GITHUB_WORKSPACE/tf/plans/$GITHUB_RUN_ID-$GITHUB_SHA.tfplan" >> $GITHUB_ENV
+          echo "TELEPORT_CLUSTER_VERSION=$(curl https://${{ secrets.TELEPORT_CLUSTER_DOMAIN }}/v1/webapi/automaticupgrades/channel/default/version | sed 's/v//')" >> $GITHUB_ENV
+
+      - name: Clean up previous artifact directory
+        run: rm -rf /tmp/tbot /tmp/bot-config.yaml && mkdir -p ~/.aws
+
+      - name: Fetch Teleport binaries
+        uses: teleport-actions/setup@v1
+        with:
+          version: ${{ env.TELEPORT_CLUSTER_VERSION }}
+
+      - name: Start Workload Identity Bot
+        run: |
+          cat <<EOF > /tmp/bot-config.yaml
+          version: v2
+          onboarding:
+            join_method: github
+            token: ${{ secrets.TELEPORT_BOT_TOKEN }}
+          storage:
+            type: directory
+            path: /tmp/tbot
+            symlinks: try-secure
+            acls: "off"
+          services:
+            - type: identity
+              destination:
+                type: directory
+                path: /tmp/tbot
+                symlinks: try-secure
+                acls: "off"
+              ssh_config: "on"
+          debug: false
+          proxy_server: ${{ secrets.TELEPORT_CLUSTER_DOMAIN }}:443
+          oneshot: true
+          fips: false
+          outputs:
+            - type: workload-identity-x509
+              destination:
+                type: directory
+                path: /tmp/tbot
+              selector:
+                name: ${{ secrets.TELEPORT_WORKLOAD_IDENTITY }}
+          EOF
+          
+          export TELEPORT_ANONYMOUS_TELEMETRY=1 
+          # --certificate-ttl might be changed to --credential-ttl
+          tbot start -c /tmp/bot-config.yaml  --certificate-ttl 10m --renewal-interval 5m
+
+      - name: Generate AWS Credentials using Workload Identity
+        run: |
+
+          curl https://rolesanywhere.amazonaws.com/releases/1.4.0/X86_64/Linux/aws_signing_helper --output /tmp/tbot/aws_signing_helper
+          chmod +x /tmp/tbot/aws_signing_helper
+          
+          # Generate AWS credentials using the Teleport identity
+          /tmp/tbot/aws_signing_helper credential-process \
+            --certificate /tmp/tbot/svid.pem \
+            --private-key /tmp/tbot/svid_key.pem \
+            --profile-arn "${{ secrets.AWS_WORKLOAD_PROFILE_ARN }}" \
+            --trust-anchor-arn "${{ secrets.AWS_WORKLOAD_TRUST_ANCHOR_ARN }}" \
+            --role-arn "${{ secrets.AWS_WORKLOAD_ROLE_ARN }}" > /tmp/tbot/aws_creds.json
+
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id = $(jq -r '.AccessKeyId' /tmp/tbot/aws_creds.json)" >> ~/.aws/credentials
+          echo "aws_secret_access_key = $(jq -r '.SecretAccessKey' /tmp/tbot/aws_creds.json)" >> ~/.aws/credentials
+          echo "aws_session_token = $(jq -r '.SessionToken' /tmp/tbot/aws_creds.json)" >> ~/.aws/credentials
+          chmod 600 ~/.aws/credentials  # Secure the credentials file
+
+      - name: Install Terraform
+        id: install-terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        id: init
+        run: |
+          cd ${{ env.TF_PATH }} && terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd ${{ env.TF_PATH }} && terraform plan --var-file=$GITHUB_WORKSPACE/tf/tfvars/ci-cd.prd.tfvars -out="${{ env.TF_PLAN_PATH }}"
+
+      - name: Terraform Apply
+        id: apply
+        run: |
+          cd ${{ env.TF_PATH }} && terraform apply -auto-approve "${{ env.TF_PLAN_PATH }}"
+
+      - name: Clean up
+        if: always()
+        run: pkill tbot || true && rm -rf /tmp/tbot /tmp/bot-config.yaml ~/.aws
