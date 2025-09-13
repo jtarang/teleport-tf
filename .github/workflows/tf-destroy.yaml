@@ -1,4 +1,4 @@
-name: Terraform Apply Pipeline
+name: Terraform Destroy Pipeline
 
 on:
   push: {}
@@ -7,8 +7,8 @@ on:
 
 jobs:
 
-  terraform-apply:
-    name: Terraform Apply
+  terraform-destroy:
+    name: Terraform Destroy
     runs-on: ubuntu-latest
     #if: github.ref == 'refs/heads/main' # Deploy only on the main branch
     permissions:
@@ -114,12 +114,12 @@ jobs:
           export TF_VAR_TF_TELEPORT_ADDR="nebula-dash.teleport.sh:443"
           cd ${{ env.TF_PATH }} && terraform plan --var-file=tfvars/ci-cd.prd.tfvars -out="${{ env.TF_PLAN_PATH }}"
 
-      - name: Terraform Apply
+      - name: Terraform Destroy
         id: apply
         run: |
           export TF_VAR_TF_TELEPORT_IDENTITY_FILE_PATH="/tmp/terraform/identity"
           export TF_VAR_TF_TELEPORT_ADDR="nebula-dash.teleport.sh:443"
-          cd ${{ env.TF_PATH }} && terraform apply -auto-approve "${{ env.TF_PLAN_PATH }}"
+          cd ${{ env.TF_PATH }} && terraform destroy -auto-approve "${{ env.TF_PLAN_PATH }}"
 
       - name: Clean up
         if: always()
