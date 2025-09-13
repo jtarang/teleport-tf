@@ -2,6 +2,7 @@ name: Terraform Destroy Pipeline
 
 on:
   workflow_dispatch: {}
+  push: {}
 
 jobs:
 
