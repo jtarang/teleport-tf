@@ -30,7 +30,7 @@ jobs:
           echo "TELEPORT_CLUSTER_VERSION=$(curl https://${{ secrets.TELEPORT_CLUSTER_DOMAIN }}/v1/webapi/automaticupgrades/channel/default/version | sed 's/v//')" >> $GITHUB_ENV
 
       - name: Clean up previous artifact directory
-        run: rm -rf /tmp/tbot /tmp/tbot/terraform /tmp/bot-config.yaml && mkdir -p ~/.aws
+        run: rm -rf /tmp/tbot /tmp/terraform /tmp/bot-config.yaml && mkdir -p ~/.aws
 
       - name: Fetch Teleport binaries
         uses: teleport-actions/setup@v1
@@ -59,13 +59,13 @@ jobs:
               ssh_config: "on"
           debug: false
           proxy_server: ${{ secrets.TELEPORT_CLUSTER_DOMAIN }}:443
-          oneshot: true
+          oneshot: false
           fips: false
           outputs:
             - type: identity
               destination:
                 type: directory
-                path: /tmp/tbot/terraform
+                path: /tmp/terraform
             - type: workload-identity-x509
               destination:
                 type: directory
@@ -123,9 +123,9 @@ jobs:
           export TF_TELEPORT_ADDR="nebula-dash.teleport.sh:443"
           export TF_VAR_TF_TELEPORT_ADDR="nebula-dash.teleport.sh:443"
           export TF_VAR_teleport_address="nebula-dash.teleport.sh:443"      
-          export TF_VAR_teleport_identity_file_base64="$(base64 /tmp/tbot/terraform/identity)"
+          export TF_VAR_teleport_identity_file_base64="$(base64 /tmp/terraform/identity)"
           cd ${{ env.TF_PATH }} && terraform apply -auto-approve "${{ env.TF_PLAN_PATH }}"
 
       - name: Clean up
         if: always()
-        run: pkill tbot || true && rm -rf /tmp/tbot /tmp/tbot/terraform /tmp/bot-config.yaml ~/.aws
+        run: pkill tbot || true && rm -rf /tmp/tbot /tmp/terraform /tmp/bot-config.yaml ~/.aws
