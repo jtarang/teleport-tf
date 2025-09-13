@@ -110,7 +110,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-          export TF_VAR_TF_TELEPORT_IDENTITY_FILE_PATH="/tmp/terraform/identity"
+          export TF_TELEPORT_IDENTITY_FILE_PATH="/tmp/terraform/identity"
           export TF_TELEPORT_ADDR="nebula-dash.teleport.sh:443"
           export TF_VAR_teleport_identity_file_base64="$(base64 /tmp/terraform/identity)"
           cd ${{ env.TF_PATH }} && terraform plan --var-file=tfvars/ci-cd.prd.tfvars -out="${{ env.TF_PLAN_PATH }}"
@@ -118,7 +118,7 @@ jobs:
       - name: Terraform Apply
         id: apply
         run: |
-          export TF_VAR_TF_TELEPORT_IDENTITY_FILE_PATH="/tmp/terraform/identity"
+          export TF_TELEPORT_IDENTITY_FILE_PATH="/tmp/terraform/identity"
           export TF_TELEPORT_ADDR="nebula-dash.teleport.sh:443"
           export TF_VAR_teleport_identity_file_base64="$(base64 /tmp/terraform/identity)"
           cd ${{ env.TF_PATH }} && terraform apply -auto-approve "${{ env.TF_PLAN_PATH }}"
