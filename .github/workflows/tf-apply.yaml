@@ -30,7 +30,7 @@ jobs:
           echo "TELEPORT_CLUSTER_VERSION=$(curl https://${{ secrets.TELEPORT_CLUSTER_DOMAIN }}/v1/webapi/automaticupgrades/channel/default/version | sed 's/v//')" >> $GITHUB_ENV
 
       - name: Clean up previous artifact directory
-        run: rm -rf /tmp/tbot /tmp/bot-config.yaml && mkdir -p ~/.aws
+        run: rm -rf /tmp/tbot /tmp/tbot/terraform /tmp/bot-config.yaml && mkdir -p ~/.aws
 
       - name: Fetch Teleport binaries
         uses: teleport-actions/setup@v1
@@ -62,6 +62,10 @@ jobs:
           oneshot: true
           fips: false
           outputs:
+            - type: identity
+              destination:
+                type: directory
+                path: /tmp/tbot/terraform
             - type: workload-identity-x509
               destination:
                 type: directory
@@ -102,23 +106,22 @@ jobs:
       - name: Terraform Init
         id: init
         run: |
-          eval "$(tctl terraform env)"   
           cd ${{ env.TF_PATH }} && terraform init
 
       - name: Terraform Plan
         id: plan
         run: |
-          export TF_VAR_teleport_address="$TF_TELEPORT_ADDR"      
-          export TF_VAR_teleport_identity_file_base64="$TF_TELEPORT_IDENTITY_FILE_BASE64"
+          export TF_VAR_teleport_address="${{ secrets.TELEPORT_CLUSTER_DOMAIN }}:443"      
+          export TF_VAR_teleport_identity_file_base64="$(base64 /tmp/tbot/terraform/identity)"
           cd ${{ env.TF_PATH }} && terraform plan --var-file=tfvars/ci-cd.prd.tfvars -out="${{ env.TF_PLAN_PATH }}"
 
       - name: Terraform Apply
         id: apply
         run: |
-          export TF_VAR_teleport_address="$TF_TELEPORT_ADDR"      
-          export TF_VAR_teleport_identity_file_base64="$TF_TELEPORT_IDENTITY_FILE_BASE64"
+          export TF_VAR_teleport_address="${{ secrets.TELEPORT_CLUSTER_DOMAIN }}:443"      
+          export TF_VAR_teleport_identity_file_base64="$(base64 /tmp/tbot/terraform/identity)"
           cd ${{ env.TF_PATH }} && terraform apply -auto-approve "${{ env.TF_PLAN_PATH }}"
 
       - name: Clean up
         if: always()
-        run: pkill tbot || true && rm -rf /tmp/tbot /tmp/bot-config.yaml ~/.aws
+        run: pkill tbot || true && rm -rf /tmp/tbot /tmp/tbot/terraform /tmp/bot-config.yaml ~/.aws
