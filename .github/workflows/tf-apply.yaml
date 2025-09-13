@@ -76,7 +76,7 @@ jobs:
           
           export TELEPORT_ANONYMOUS_TELEMETRY=1 
           # --certificate-ttl might be changed to --credential-ttl
-          tbot start -c /tmp/bot-config.yaml  --certificate-ttl 10m --renewal-interval 5m
+          tbot start -c /tmp/bot-config.yaml  --certificate-ttl 10m --renewal-interval 5m &
 
       - name: Generate AWS Credentials using Workload Identity
         run: |
