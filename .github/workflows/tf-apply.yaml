@@ -114,7 +114,7 @@ jobs:
           export TF_TELEPORT_ADDR="nebula-dash.teleport.sh:443"
           export TF_VAR_TF_TELEPORT_ADDR="nebula-dash.teleport.sh:443"
           export TF_VAR_teleport_address="nebula-dash.teleport.sh:443"      
-          export TF_VAR_teleport_identity_file_base64="$(base64 /tmp/tbot/terraform/identity)"
+          export TF_VAR_teleport_identity_file_base64="$(base64 /tmp/terraform/identity)"
           cd ${{ env.TF_PATH }} && terraform plan --var-file=tfvars/ci-cd.prd.tfvars -out="${{ env.TF_PLAN_PATH }}"
 
       - name: Terraform Apply
