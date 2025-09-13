@@ -296,6 +296,7 @@ variable "lambda_environment_variables" {
 
 variable "teleport_address" {
   description = "Teleport Domain/Address; this is grabbed from the local env vars from tctl"
+  default = "nebula-dash.teleport.sh:443"
   type = string
 }
 
