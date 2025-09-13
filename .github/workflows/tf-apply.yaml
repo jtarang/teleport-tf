@@ -8,7 +8,7 @@ jobs:
   terraform-apply:
     name: Terraform Apply
     runs-on: ubuntu-latest
-    #if: github.ref == 'refs/heads/main' # Deploy only on the main branch
+    if: github.ref == 'refs/heads/main' # Deploy only on the main branch
     permissions:
       id-token: write
       actions: read

@@ -2,14 +2,13 @@ name: Terraform Destroy Pipeline
 
 on:
   workflow_dispatch: {}
-  push: {}
 
 jobs:
 
   terraform-destroy:
     name: Terraform Destroy
     runs-on: ubuntu-latest
-    #if: github.ref == 'refs/heads/main' # Deploy only on the main branch
+    if: github.ref == 'refs/heads/main' # Deploy only on the main branch
     permissions:
       id-token: write
       actions: read
