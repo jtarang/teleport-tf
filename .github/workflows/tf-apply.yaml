@@ -113,7 +113,7 @@ jobs:
           export TF_TELEPORT_ADDR="${{ secrets.TELEPORT_CLUSTER_DOMAIN }}:443"
           export TF_VAR_teleport_address="${{ secrets.TELEPORT_CLUSTER_DOMAIN }}:443"
           export TF_VAR_teleport_identity_file_base64="$(base64 /tmp/terraform/identity)"
-          cd ${{ env.TF_PATH }} && terraform plan --var-file=tfvars/${{ secrets.CI_CD_TFVARS }} -out="${{ env.TF_PLAN_PATH }}"
+          cd ${{ env.TF_PATH }} && terraform plan --var-file=${{ secrets.CI_CD_TFVARS }} -out="${{ env.TF_PLAN_PATH }}"
 
       - name: Terraform Apply
         id: apply
