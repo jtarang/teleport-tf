@@ -21,6 +21,6 @@ provider "aws" {
 
 provider "teleport" {
   alias                 = "gravitational"
-  addr                  = var.teleport_address
+  addr                  = "nebula-dash.teleport.sh:443"
   identity_file_base64  = var.teleport_identity_file_base64
 }
