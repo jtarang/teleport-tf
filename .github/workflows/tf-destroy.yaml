@@ -123,8 +123,8 @@ jobs:
           export TF_TELEPORT_ADDR="${{ secrets.TELEPORT_CLUSTER_DOMAIN }}:443"
           export TF_VAR_teleport_address="${{ secrets.TELEPORT_CLUSTER_DOMAIN }}:443"
           export TF_VAR_teleport_identity_file_base64="$(base64 /tmp/terraform/identity)"
-          cd ${{ env.TF_PATH }} && terraform destroy -auto-approve "${{ env.TF_PLAN_PATH }}"
+          cd ${{ env.TF_PATH }} && terraform destroy -auto-approve
 
       - name: Clean up
         if: always()
-        run: pkill tbot || true && rm -rf /tmp/tbot /tmp/terraform /tmp/bot-config.yaml ~/.aws
+        run: pkill tbot || true && rm -rf /tmp/tbot /tmp/terraform /tmp/bot-config.yaml ~/.aws ${{ env.TF_PATH }}

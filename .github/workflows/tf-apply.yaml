@@ -126,4 +126,4 @@ jobs:
 
       - name: Clean up
         if: always()
-        run: pkill tbot || true && rm -rf /tmp/tbot /tmp/terraform /tmp/bot-config.yaml ~/.aws
+        run: pkill tbot || true && rm -rf /tmp/tbot /tmp/terraform /tmp/bot-config.yaml ~/.aws ${{ env.TF_PATH }}
