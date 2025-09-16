@@ -162,7 +162,7 @@ EOF
 }
 
 configure_admin_user() {
-    if [[ -n "${DATABASE_TELEPORT_ADMIN_USER}" && "${ENVIRONMENT_TAG}" == "prd" ]]; then
+    if [[ -n "${DATABASE_TELEPORT_ADMIN_USER}" && "${ENVIRONMENT_TAG}" == "dev" ]]; then
         cat<<EOF >>/etc/teleport.yaml
     admin_user:
       "name": "${DATABASE_TELEPORT_ADMIN_USER}"
@@ -246,7 +246,7 @@ if [[ -n "${DATABASE_NAME}" && -n "${DATABASE_PROTOCOL}" && -n "${DATABASE_URI}"
     configure_postgresql_service_block
 fi
 
-#configure_admin_user
+configure_admin_user
 setup_mongodb_service
 setup_grafana_service
 
