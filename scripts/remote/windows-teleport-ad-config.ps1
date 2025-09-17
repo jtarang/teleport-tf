@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+ $ErrorActionPreference = "Stop"
 
 $AD_USER_NAME = "Teleport Service Account"
 $SAM_ACCOUNT_NAME = "svc-teleport"
@@ -140,7 +140,7 @@ function Configure-AccessGPO {
     $CERT = [System.Convert]::FromBase64String("$TELEPORT_CA_CERT_BLOB_BASE64")
     Set-GPRegistryValue -Name $ACCESS_GPO_NAME -Key "HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\SystemCertificates\Root\Certificates\$TELEPORT_CA_CERT_SHA1" -ValueName "Blob" -Type Binary -Value $CERT
 
-    $TeleportPEMFile = $env:TEMP + "\teleport.pem"
+    $global:TeleportPEMFile = $env:TEMP + "\teleport.pem"
     Write-Output $TELEPORT_CA_CERT_PEM | Out-File -FilePath $TeleportPEMFile
 
     certutil -dspublish -f $TeleportPEMFile RootCA
@@ -200,16 +200,16 @@ signature="$CHICAGO$"
 
 function Export-LDAPCertificate {
     # # Step 5/7. Export your LDAP CA certificate
-    $WindowsDERFile = $env:TEMP + "\windows.der"
-    $WindowsPEMFile = $env:TEMP + "\windows.pem"
-    certutil "-ca.cert" $WindowsDERFile
-    certutil -encode $WindowsDERFile $WindowsPEMFile
+    $global:WindowsDERFile = $env:TEMP + "\windows.der"
+    $global:WindowsPEMFile = $env:TEMP + "\windows.pem"
+    certutil "-ca.cert" $WindowsDERFile | Out-Null
+    certutil -encode $WindowsDERFile $WindowsPEMFile | Out-Null
 
-    gpupdate.exe /force
+    gpupdate.exe /force | Out-Null
 
     $CA_CERT_PEM = Get-Content -Path $WindowsPEMFile
-    $CA_CERT_YAML = $CA_CERT_PEM | ForEach-Object { "        " + $_ } | Out-String
-    return $CA_CERT_YAML, $WindowsDERFile, $WindowsPEMFile
+    $CA_CERT_YAML = $CA_CERT_PEM | ForEach-Object { "      " + $_ } | Out-String
+    return $CA_CERT_YAML
 }
 
 function Generate-LDAPConfig($CA_CERT_YAML) {
@@ -220,27 +220,33 @@ function Generate-LDAPConfig($CA_CERT_YAML) {
 
     $COMPUTER_NAME = (Resolve-DnsName -Type A $Env:COMPUTERNAME).Name
     $COMPUTER_IP = (Resolve-DnsName -Type A $Env:COMPUTERNAME).Address
-    $LDAP_ADDR = "$DOMAIN_NAME" + ":636"
+    $LDAP_ADDR = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.254.*'} | Sort-Object InterfaceMetric | Select-Object -First 1).IPAddress + ":636"
 
     $LDAP_CONFIG_YAML = @"
-ldap:
-  # Ensure this is a public IP address or DNS name.
-  addr:        '$LDAP_ADDR'
-  # The Active Directory domain name.
-  domain:    '$DOMAIN_NAME'
-  # The service account username, prefixed with the NetBIOS name of the domain.
-  username: '$LDAP_USERNAME'
-  # The security identifier of the service account specified by the username
-  # field above.
-  sid: '$LDAP_USER_SID'
-  # The server name to use when validating the LDAP server's
-  # certificate. Useful in cases where addr is an IP but the server
-  # presents a cert with some other hostname.
-  server_name: '$COMPUTER_NAME'
-  insecure_skip_verify: false
-  # The PEM encoded LDAP CA certificate of this AD's LDAP server.
-  ldap_ca_cert: |
+windows_desktop_service:
+  enabled: yes
+  ldap:
+    # Ensure this is a public IP address or DNS name.
+    addr:        '$LDAP_ADDR'
+    # The Active Directory domain name.
+    domain:    '$DOMAIN_NAME'
+    # The service account username, prefixed with the NetBIOS name of the domain.
+    username: '$LDAP_USERNAME'
+    # The security identifier of the service account specified by the username
+    # field above.
+    sid: '$LDAP_USER_SID'
+    # The server name to use when validating the LDAP server's
+    # certificate. Useful in cases where addr is an IP but the server
+    # presents a cert with some other hostname.
+    server_name: '$COMPUTER_NAME'
+    insecure_skip_verify: false
+    # The PEM encoded LDAP CA certificate of this AD's LDAP server.
+    ldap_ca_cert: |
 $CA_CERT_YAML
+  discovery:
+    base_dn: '*'
+  labels:
+    env: prd
 "@
     return $LDAP_CONFIG_YAML
 }
@@ -318,9 +324,8 @@ function Main() {
   Create-LDAPContainers
   Configure-BlockingGPO
   Configure-AccessGPO
-  Export-LDAPCertificate
-  Display-CompletionMessage (Generate-LDAPConfig $CA_CERT_YAML)
+  Display-CompletionMessage (Generate-LDAPConfig -CA_CERT_YAML (Export-LDAPCertificate))
   Cleanup-Files $TeleportPEMFile $WindowsDERFile $WindowsPEMFile
 }
 
-Main
+Main 

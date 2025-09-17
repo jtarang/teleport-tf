@@ -1,11 +1,18 @@
-<powershell>
-$Global:LogPath = "C:\DomainSetup.log"
-Function Write-Log {
-    param([string]$Message)
-    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    "$Timestamp  $Message" | Out-File -FilePath $Global:LogPath -Append -Encoding utf8
-    Write-Host $Message
+# Ensure Write-Log is always defined
+if (-not (Get-Command Write-Log -ErrorAction SilentlyContinue)) {
+    Function Write-Log {
+        param([string]$Message)
+        $Global:LogPath = $Global:LogPath | ForEach-Object { $_ }  # preserve global path if already set
+        if (-not $Global:LogPath) { $Global:LogPath = "C:\DomainSetup.log" }
+
+        $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        "$Timestamp  $Message" | Out-File -FilePath $Global:LogPath -Append -Encoding utf8
+        Write-Host $Message
+    }
 }
+
+$Global:LogPath = "C:\DomainSetup.log"
+Write-Log "========== Domain Setup Script Started =========="
 
 function Install-ADFeatures {
     Write-Log 'Installing the AD services and administration tools...'
@@ -40,27 +47,31 @@ function Install-ADForest {
         throw
     }
 
-    Write-Log "Scheduling post-reboot setup..."
+    # Post-reboot setup script
     $PostRebootScript = @"
-`$LogPath = 'C:\DomainSetup.log'
-Function Write-Log {
-    param([string]`$Message)
-    `$Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    "`$Timestamp  `$Message" | Out-File -FilePath `$LogPath -Append -Encoding utf8
+# Ensure Write-Log exists in post-reboot script
+if (-not (Get-Command Write-Log -ErrorAction SilentlyContinue)) {
+    function Write-Log {
+        param([string]`$Message)
+        `$LogPath = 'C:\DomainSetup.log'
+        `$Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        "`$Timestamp  `$Message" | Out-File -FilePath `$LogPath -Append -Encoding utf8
+        Write-Host `$Message
+    }
 }
 
 Write-Log 'Post-reboot setup started.'
-Start-Sleep -Seconds 60  # Wait for AD services to initialize
+Start-Sleep -Seconds 60  # wait for AD services to initialize
 
 try {
     Write-Log 'Installing AD CS...'
     Add-WindowsFeature Adcs-Cert-Authority -IncludeManagementTools | Out-Null
-    Install-AdcsCertificationAuthority -CAType EnterpriseRootCA -HashAlgorithmName SHA384 -Force | Out-Null
+    Install-AdcsCertificationAuthority -CAType EnterpriseRootCA -CACommonName "CorpRootCA" -KeyLength 2048 -HashAlgorithmName SHA256 -ValidityPeriod Years -ValidityPeriodUnits 10 -Force | Out-Null
     Write-Log 'AD CS installed.'
 
     # Create AD Admin User
-    `$Username = "${WINDOWS_AD_ADMIN_USERNAME}"
-    `$Password = "${WINDOWS_AD_ADMIN_PASSWORD}"
+    `$Username = "${WINDOWS_AD_ADMIN_USERNAME}".Trim()
+    `$Password = "${WINDOWS_AD_ADMIN_PASSWORD}".Trim()
     `$AdminPassword = ConvertTo-SecureString `$Password -AsPlainText -Force
     Write-Log "Creating AD admin user `$Username..."
     New-ADUser -Name `$Username -AccountPassword `$AdminPassword -Enabled `$true -PassThru | Out-Null
@@ -80,7 +91,7 @@ catch {
     $ScriptPath = "C:\PostRebootSetup.ps1"
     $PostRebootScript | Out-File -FilePath $ScriptPath -Encoding utf8
 
-    # Register scheduled task (runs at startup as SYSTEM)
+    # Register scheduled task
     $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$ScriptPath`""
     $Trigger = New-ScheduledTaskTrigger -AtStartup
     $Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -RunLevel Highest
@@ -91,10 +102,8 @@ catch {
     Restart-Computer -Force
 }
 
-$DOMAIN = "${WINDOWS_AD_DOMAIN_NAME}"
-$SafeModeAdministratorPassword = ConvertTo-SecureString "${WINDOWS_AD_ADMIN_PASSWORD}" -AsPlainText -Force
+$DOMAIN = "${WINDOWS_AD_DOMAIN_NAME}".Trim()
+$SafeModeAdministratorPassword = ConvertTo-SecureString "${WINDOWS_AD_ADMIN_PASSWORD}".Trim() -AsPlainText -Force
 
-Write-Log "========== Domain Setup Script Started =========="
 Install-ADFeatures
 Install-ADForest -Domain $DOMAIN -SafeModeAdministratorPassword $SafeModeAdministratorPassword
-</powershell>
