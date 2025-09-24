@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+ $ErrorActionPreference = "Stop"
 
 $AD_USER_NAME = "Teleport Service Account"
 $SAM_ACCOUNT_NAME = "svc-teleport"
