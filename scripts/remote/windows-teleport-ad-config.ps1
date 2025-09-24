@@ -288,7 +288,7 @@ function Cleanup-Files($TeleportPEMFile, $WindowsDERFile, $WindowsPEMFile) {
     Remove-Item $WindowsPEMFile -Recurse
 
     # Prompt the user to press any key to exit
-    $x = Read-Host "Press close this window..."
+    #$x = Read-Host "Press close this window..."
 }
 
 
@@ -318,7 +318,7 @@ function Verify-Requirements() {
 
 # Main Script Execution
 function Main() {
-  Prompt-ForAcknowledgment
+  #Prompt-ForAcknowledgment
   Verify-Requirements
   Create-ServiceAccount
   Create-LDAPContainers
