@@ -111,3 +111,5 @@ $SafeModeAdministratorPassword = ConvertTo-SecureString "${WINDOWS_AD_ADMIN_PASS
 
 Install-ADFeatures
 Install-ADForest -Domain $DOMAIN -SafeModeAdministratorPassword $SafeModeAdministratorPassword
+
+</powershell>
