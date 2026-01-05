@@ -10,6 +10,7 @@ tags = {
   "teleport.dev/creator" = "jasmit.tarang@goteleport.com" # Creator's email
   "Owner"                = "Jasmit Tarang"                # Resource owner
   "Team"                 = "Solutions Engineering"        # Team responsible
+  "Environment"          = "jasmit-cost-tracker-enabled-true"
 }
 
 # ==============================
