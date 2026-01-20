@@ -31,6 +31,14 @@ resource "aws_security_group" "nsg" {
     protocol    = "udp"
     self        = true
   }
+  
+  #  Allow Postgres
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    self        = true
+  }
 
 }
 
