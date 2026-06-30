@@ -2,7 +2,7 @@
 # General Configuration
 # ==============================
 aws_region  = "us-east-1"      # AWS region for resources
-user_prefix = "jasmit" # Prefix for user-specific resources
+user_prefix = "jasmit-nebula-dash" # Prefix for user-specific resources
 aws_profile_name = ""
 
 # Tagging for resources
