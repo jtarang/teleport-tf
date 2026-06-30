@@ -75,7 +75,7 @@ rds_db_instance_class          = "db.t4g.micro"       # RDS instance type
 rds_db_allocated_storage       = 20                   # Storage allocated for the RDS instance in GB
 rds_db_storage_type            = "gp2"                # Type of storage for RDS (gp2 for General Purpose SSD)
 rds_db_engine                  = "postgres"           # Database engine (PostgreSQL)
-rds_db_engine_version          = "17.4"               # Version of PostgreSQL
+rds_db_engine_version          = "17.9"               # Version of PostgreSQL
 rds_db_publicly_accessible     = true                 # Make the database publicly accessible
 rds_db_multi_az                = false                # Multi-AZ for high availability (false = no)
 rds_db_backup_retention_period = 1                    # Retention period for database backups (in days)
